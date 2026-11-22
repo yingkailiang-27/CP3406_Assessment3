@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">AlgoSteps</string>
+    <style name="Theme.AlgoSteps" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowBackground">#F8F8F2</item>
+    </style>
+</resources>

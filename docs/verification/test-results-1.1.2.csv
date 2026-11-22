@@ -1,0 +1,34 @@
+﻿version,class,test,runner,status,seconds
+1.1.2,edu.algosteps.HistoryNavigationTest,openingExamFromHistoryRestoresExamDraftWhenPracticeDraftAlsoExists,Robolectric API 35,pass,10.059
+1.1.2,edu.algosteps.NavigationFlowTest,lessonLeadsToMatchingPracticeAndBackRestoresTheLesson,Robolectric API 35,pass,0.879
+1.1.2,edu.algosteps.content.BinaryTraceTest,diagramNeverDiscardsAMatchingIndexAndEndsWithTheDeclaredResult,JVM,pass,0.014
+1.1.2,edu.algosteps.data.StudyRepositoryTest,deleteClearsPrivateWorkTogetherAndRetainsSettingsAndPublicReadings,Robolectric API 35,pass,0.095
+1.1.2,edu.algosteps.data.StudyRepositoryTest,disablingRemindersDuringDeliveryLeavesNoNotification,Robolectric API 35,pass,0.049
+1.1.2,edu.algosteps.data.StudyRepositoryTest,migrationPreservesOldScoresAndDrafts,Robolectric API 35,pass,0.083
+1.1.2,edu.algosteps.data.StudyRepositoryTest,reviewsRequireConsentAndIgnorePreviouslySolvedExercises,Robolectric API 35,pass,0.062
+1.1.2,edu.algosteps.data.StudyRepositoryTest,firstSubmissionAndIdenticalRetryReturnTheSamePersistedRow,Robolectric API 35,pass,0.043
+1.1.2,edu.algosteps.data.StudyRepositoryTest,offlineRefreshPreservesLastSuccessfulReading,Robolectric API 35,pass,0.042
+1.1.2,edu.algosteps.data.WikipediaSourceTest,versionTwoResponseUsesCanonicalArticleUrlForAttribution,Robolectric API 35,pass,0.034
+1.1.2,edu.algosteps.data.WikipediaSourceTest,malformedMissingOrExternalArticlesAreNotCached,Robolectric API 35,pass,0.022
+1.1.2,edu.algosteps.judge.CodeJudgeTest,forwardBackwardAndNestedLoopsRespectLoopControl,JVM,pass,0.002
+1.1.2,edu.algosteps.judge.CodeJudgeTest,binarySearchWorksAcrossSmallSortedInputs,JVM,pass,0.004
+1.1.2,edu.algosteps.judge.CodeJudgeTest,statementKeywordsAcceptParenthesesAndAdjacentOperators,JVM,pass,0.0
+1.1.2,edu.algosteps.judge.CodeJudgeTest,arithmeticAndShortCircuitMatchDocumentedSemantics,JVM,pass,0.002
+1.1.2,edu.algosteps.judge.CodeJudgeTest,infiniteLoopAndDeepParsingHaveBoundedCost,JVM,pass,0.007
+1.1.2,edu.algosteps.judge.CodeJudgeTest,augmentedAssignmentChecksCurrentValueBeforeEvaluatingItsRightSide,JVM,pass,0.001
+1.1.2,edu.algosteps.judge.CodeJudgeTest,invalidStudentInputReportsLineAndReason,JVM,pass,0.0
+1.1.2,edu.algosteps.judge.CodeJudgeTest,pythonKeywordsCannotBecomeNamesEvenInSkippedExpressions,JVM,pass,0.0
+1.1.2,edu.algosteps.judge.CodeJudgeTest,linearSearchReturnsFirstDuplicateAndHandlesEmpty,JVM,pass,0.0
+1.1.2,edu.algosteps.judge.CodeJudgeTest,nonzeroDecimalLiteralsRejectLeadingZerosDuringParsing,JVM,pass,0.0
+1.1.2,edu.algosteps.judge.CodeJudgeTest,returnDetectionCountsParsedStatementsAcrossAllBranches,JVM,pass,0.001
+1.1.2,edu.algosteps.judge.CurriculumJudgeTest,eachReferencePassesAllCasesAndEachStarterNeedsAnEdit,JVM,pass,0.018
+1.1.2,edu.algosteps.ui.CodingScreenTest,examKeepsWorkedAnswerClosedUntilSubmissionAndDisablesDuplicateSubmit,Robolectric API 35,pass,0.175
+1.1.2,edu.algosteps.ui.CodingScreenTest,rerunningPublicSamplesKeepsTheSubmittedAdditionalCheckBreakdown,Robolectric API 35,pass,0.443
+1.1.2,edu.algosteps.ui.CodingScreenTest,sampleAndSubmissionUseRealJudgeAndRecordOnlyOneAttempt,Robolectric API 35,pass,0.494
+1.1.2,edu.algosteps.ui.CodingScreenTest,unfinishedExamCannotRevealAnswerButAnIncorrectIntegerStillCounts,Robolectric API 35,pass,0.31
+1.1.2,edu.algosteps.ui.CodingScreenTest,practiceAllowsCodeEditingAndExplainsTheSolutionWithoutSubmission,Robolectric API 35,pass,0.182
+1.1.2,edu.algosteps.ui.DashboardUiTest,emptyExamHistoryDoesNotReportAZeroPercentResult,Robolectric API 35,pass,0.178
+1.1.2,edu.algosteps.ui.DashboardUiTest,statisticsDistinguishPassingCasesFromAnAcceptedSubmission,Robolectric API 35,pass,0.17
+1.1.2,edu.algosteps.ui.DashboardUiTest,deletingProgressRequiresAnExplicitConfirmation,Robolectric API 35,pass,0.272
+1.1.2,edu.algosteps.ui.DashboardUiTest,aLearnerCanChooseEitherTrackFromHome,Robolectric API 35,pass,0.103
+1.1.2,edu.algosteps.ui.LearnTraceAccessibilityTest,oneLabelPerCellTracksTheShrinkingInterval,Robolectric API 35,pass,0.143

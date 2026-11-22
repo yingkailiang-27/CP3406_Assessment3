@@ -1,0 +1,28 @@
+JUnit version 4.13.2
+...E...E..E..
+Time: 0.084
+There were 3 failures:
+1) statementKeywordsAcceptParenthesesAndAdjacentOperators(edu.algosteps.judge.CodeJudgeTest)
+edu.algosteps.judge.JudgeException: Line 3: Unsupported statement. Try an assignment, condition, loop or return.
+	at edu.algosteps.judge.MiniPython$Parser.error(MiniPython.java:309)
+	at edu.algosteps.judge.MiniPython$Parser.statement(MiniPython.java:248)
+	at edu.algosteps.judge.MiniPython$Parser.child(MiniPython.java:174)
+	at edu.algosteps.judge.MiniPython$Parser.program(MiniPython.java:157)
+	at edu.algosteps.judge.MiniPython.compile(MiniPython.java:31)
+	at edu.algosteps.judge.CodeJudgeTest.run(CodeJudgeTest.java:15)
+	at edu.algosteps.judge.CodeJudgeTest.statementKeywordsAcceptParenthesesAndAdjacentOperators(CodeJudgeTest.java:105)
+2) augmentedAssignmentChecksCurrentValueBeforeEvaluatingItsRightSide(edu.algosteps.judge.CodeJudgeTest)
+java.lang.AssertionError: Line 2: Index 99 is outside nums (length 2).
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at edu.algosteps.judge.CodeJudgeTest.rejects(CodeJudgeTest.java:23)
+	at edu.algosteps.judge.CodeJudgeTest.augmentedAssignmentChecksCurrentValueBeforeEvaluatingItsRightSide(CodeJudgeTest.java:118)
+3) pythonKeywordsCannotBecomeNamesEvenInSkippedExpressions(edu.algosteps.judge.CodeJudgeTest)
+java.lang.AssertionError: Expected a judge error.
+	at org.junit.Assert.fail(Assert.java:89)
+	at edu.algosteps.judge.CodeJudgeTest.rejects(CodeJudgeTest.java:21)
+	at edu.algosteps.judge.CodeJudgeTest.pythonKeywordsCannotBecomeNamesEvenInSkippedExpressions(CodeJudgeTest.java:111)
+
+FAILURES!!!
+Tests run: 10,  Failures: 3
+

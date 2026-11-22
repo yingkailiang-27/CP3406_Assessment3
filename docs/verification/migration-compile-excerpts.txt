@@ -1,0 +1,9 @@
+Version 1.1 · original build log excerpts (project-root paths shortened)
+
+> Task :app:compileDebugUnitTestKotlin FAILED
+e: file://app/src/androidTest/java/edu/algosteps/data/StudyRepositoryTest.kt:102:69 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:
+fun <T : Closeable?, R> T.use(block: (T) -> R): R
+BUILD FAILED in 36s
+
+Next build, after changing the migration test to try/finally
+BUILD SUCCESSFUL in 38s

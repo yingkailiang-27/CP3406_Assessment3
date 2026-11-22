@@ -1,0 +1,5 @@
+Lint found 1 errors, 1 warnings. First failure:
+
+app/src/main/res/values/base.xml:6: Error: android:windowLightNavigationBar requires API level 27 (current min is 26) [NewApi]
+        <item name="android:windowLightNavigationBar">true</item>
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

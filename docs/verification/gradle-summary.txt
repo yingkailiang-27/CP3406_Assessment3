@@ -1,0 +1,16 @@
+1.1.1 targeted Android regressions (Gradle excerpts)
+HistoryNavigationTest > openingExamFromHistoryRestoresExamDraftWhenPracticeDraftAlsoExists FAILED
+StudyRepositoryTest > disablingRemindersDuringDeliveryLeavesNoNotification FAILED
+StudyRepositoryTest > firstSubmissionAndIdenticalRetryReturnTheSamePersistedRow FAILED
+CodingScreenTest > rerunningPublicSamplesKeepsTheSubmittedAdditionalCheckBreakdown FAILED
+CodingScreenTest > unfinishedExamCannotRevealAnswerButAnIncorrectIntegerStillCounts FAILED
+DashboardUiTest > emptyExamHistoryDoesNotReportAZeroPercentResult FAILED
+LearnTraceAccessibilityTest > oneLabelPerCellTracksTheShrinkingInterval FAILED
+7 tests completed, 7 failed
+
+1.1.2 host regression suite, lint and APK assembly (Gradle excerpts)
+> Task :app:testDebugUnitTest
+> Task :app:assembleDebug
+> Task :app:assembleDebugAndroidTest UP-TO-DATE
+> Task :app:lintDebug
+BUILD SUCCESSFUL in 41s

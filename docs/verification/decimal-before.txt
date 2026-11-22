@@ -1,0 +1,17 @@
+CPython: 010 -> SyntaxError: leading zeros in decimal integer literals are not permitted; use an 0o prefix for octal integers
+CPython: -007 -> SyntaxError: leading zeros in decimal integer literals are not permitted; use an 0o prefix for octal integers
+CPython: 000 -> 0
+CPython: 10 -> 10
+JUnit version 4.13.2
+..........E..
+Time: 0.085
+There was 1 failure:
+1) nonzeroDecimalLiteralsRejectLeadingZerosDuringParsing(edu.algosteps.judge.CodeJudgeTest)
+java.lang.AssertionError: Expected a judge error.
+	at org.junit.Assert.fail(Assert.java:89)
+	at edu.algosteps.judge.CodeJudgeTest.rejects(CodeJudgeTest.java:22)
+	at edu.algosteps.judge.CodeJudgeTest.nonzeroDecimalLiteralsRejectLeadingZerosDuringParsing(CodeJudgeTest.java:124)
+
+FAILURES!!!
+Tests run: 12,  Failures: 1
+

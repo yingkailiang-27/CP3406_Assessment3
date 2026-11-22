@@ -1,0 +1,21 @@
+﻿issue,version,class,test,status,JUnit failure message
+09,1.1.1,edu.algosteps.ui.CodingScreenTest,unfinishedExamCannotRevealAnswerButAnIncorrectIntegerStillCounts,failed,java.lang.AssertionError: expected:<0> but was:<1>
+10,1.1.1,edu.algosteps.ui.CodingScreenTest,rerunningPublicSamplesKeepsTheSubmittedAdditionalCheckBreakdown,failed,"java.lang.AssertionError: Failed: assertExists.
+Reason: Expected exactly '1' node but could not find any node that satisfies: (Text + EditableText contains 'Additional checks: 2 of 6 passed.' (ignoreCase: false))"
+11,1.1.1,edu.algosteps.HistoryNavigationTest,openingExamFromHistoryRestoresExamDraftWhenPracticeDraftAlsoExists,failed,java.lang.AssertionError: Assert failed: The component is not displayed!
+12,1.1.1,edu.algosteps.ui.DashboardUiTest,emptyExamHistoryDoesNotReportAZeroPercentResult,failed,"java.lang.AssertionError: Failed: assertDoesNotExist.
+Reason: Did not expect any node but found '1' node that satisfies: (Text + EditableText contains '0% accepted' (ignoreCase: false))
+Node found:
+Node #246 at (l=38.0, t=140.0, r=49.0, b=176.0)px
+Text = '[0% accepted]'
+Actions = [SetTextSubstitution, ShowTextSubstitution, ClearTextSubstitution, GetTextLayoutResult]
+Has 2 siblings"
+13,1.1.1,edu.algosteps.data.StudyRepositoryTest,firstSubmissionAndIdenticalRetryReturnTheSamePersistedRow,failed,java.lang.AssertionError
+14,1.1.1,edu.algosteps.data.StudyRepositoryTest,disablingRemindersDuringDeliveryLeavesNoNotification,failed,java.lang.AssertionError
+15,1.1.1,edu.algosteps.ui.LearnTraceAccessibilityTest,oneLabelPerCellTracksTheShrinkingInterval,failed,"java.lang.AssertionError: Failed: assertDoesNotExist.
+Reason: Did not expect any node but found '1' node that satisfies: (Text + EditableText contains '[2]' (ignoreCase: false))
+Node found:
+Node #312 at (l=101.0, t=392.0, r=105.0, b=428.0)px
+Text = '[[2]]'
+Actions = [SetTextSubstitution, ShowTextSubstitution, ClearTextSubstitution, GetTextLayoutResult]
+Has 11 siblings"
