@@ -62,6 +62,12 @@ internal fun HomeContent(
             }
         }
         item {
+            Text(
+                text = "Trace an algorithm step by step, then practise coding it with the same inputs.",
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+        item {
             BoxWithConstraints(Modifier.fillMaxWidth()) {
                 if (maxWidth >= 580.dp) {
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
