@@ -116,7 +116,7 @@ internal fun CodingContent(
         state.validationMessage?.let {
             Text(it, Modifier.semantics { liveRegion = LiveRegionMode.Polite }, color = MaterialTheme.colorScheme.error)
         }
-        state.report?.let { ResultCard(it) }
+        state.report?.let { ResultCard(it, lesson, examMode) }
         if (state.report?.submitted != true) state.lastAttempt?.let { attempt ->
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text("Last saved submission: ${attempt.passed} of ${attempt.total} tests passed.")
@@ -172,7 +172,8 @@ private fun CodeEditor(
 }
 
 @Composable
-private fun ResultCard(report: Evaluation) {
+private fun ResultCard(report: Evaluation, lesson: Lesson, examMode: Boolean) {
+    var reviewedSample by remember(report) { mutableStateOf<Int?>(null) }
     OutlinedCard(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(if (report.submitted) "Submission results" else "Sample results",
@@ -187,6 +188,13 @@ private fun ResultCard(report: Evaluation) {
                 }
                 Text("Example ${index + 1}: $summary", color = if (result.passed) LocalContentColor.current
                     else MaterialTheme.colorScheme.error)
+                if (!examMode && !result.passed) {
+                    val expanded = reviewedSample == index
+                    TextButton(onClick = { reviewedSample = if (expanded) null else index }) {
+                        Text(if (expanded) "Hide example ${index + 1} steps" else "Review example ${index + 1} steps")
+                    }
+                    if (expanded) Walkthrough(lesson, sampleIndex = index)
+                }
             }
             if (report.submitted) {
                 Text(report.additionalCheckSummary())

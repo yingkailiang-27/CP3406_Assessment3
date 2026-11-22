@@ -70,9 +70,10 @@ private fun LessonText(label: String, body: String) {
 }
 
 @Composable
-private fun Walkthrough(lesson: Lesson) {
-    var example by rememberSaveable(lesson.id) { mutableIntStateOf(0) }
-    var position by rememberSaveable(lesson.id) { mutableIntStateOf(0) }
+internal fun Walkthrough(lesson: Lesson, sampleIndex: Int? = null) {
+    var selectedExample by rememberSaveable(lesson.id) { mutableIntStateOf(0) }
+    val example = sampleIndex ?: selectedExample
+    var position by rememberSaveable(lesson.id, sampleIndex) { mutableIntStateOf(0) }
     val input = lesson.samples[example]
     val steps = remember(lesson.id, example) { lesson.trace(input) }
     val frame = steps[position]
@@ -83,19 +84,21 @@ private fun Walkthrough(lesson: Lesson) {
     ) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text("Walk through an input", style = MaterialTheme.typography.titleLarge, modifier = Modifier.semantics { heading() })
-            Row(
-                modifier = Modifier.horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                lesson.samples.indices.forEach { index ->
-                    FilterChip(
-                        selected = example == index,
-                        onClick = {
-                            example = index
-                            position = 0
-                        },
-                        label = { Text("Example ${index + 1}") }
-                    )
+            if (sampleIndex == null) {
+                Row(
+                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    lesson.samples.indices.forEach { index ->
+                        FilterChip(
+                            selected = example == index,
+                            onClick = {
+                                selectedExample = index
+                                position = 0
+                            },
+                            label = { Text("Example ${index + 1}") }
+                        )
+                    }
                 }
             }
             Text("${lesson.targetLabel} = ${input.target}", style = MaterialTheme.typography.titleSmall)
