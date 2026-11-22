@@ -56,6 +56,10 @@ fun LearnScreen(lesson: Lesson, onPractice: () -> Unit, onBack: () -> Unit, onRe
         LessonText("Why it works", lesson.invariant)
         LessonText("Time and space", lesson.complexity)
         Button(onClick = onPractice, modifier = Modifier.fillMaxWidth()) { Text("Open coding exercise") }
+        Text(
+            text = "Further reading requests a public article from Wikipedia. Your code drafts and scores stay on this device.",
+            style = MaterialTheme.typography.bodyMedium
+        )
         OutlinedButton(onClick = onReading, modifier = Modifier.fillMaxWidth()) { Text("Further reading") }
         Spacer(Modifier.height(8.dp))
     }
