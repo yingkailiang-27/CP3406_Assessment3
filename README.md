@@ -1,6 +1,12 @@
 # AlgoSteps
 
-AlgoSteps is an Android app for first-year computing students. Trace an algorithm step by step, implement it using the same example inputs, and review the trace when a practice sample fails. Saved submissions appear in **View statistics**, where learners can reopen the matching exercise and draft.
+**AlgoSteps is an Android learning app that helps first-year computing students practise search and array algorithms by tracing examples and writing Python code.**
+
+1. **Algorithms** shows how an algorithm processes an example, one step at a time.
+2. **Coding** lets students write and run a solution on the same inputs. When a practice sample fails, they can compare the expected and actual results and replay that exact example beside the feedback.
+3. **View statistics** shows saved results and lets students reopen an exercise with its draft. **Settings** lets them adjust hints and clear their learning progress.
+
+For a quick demo, follow [the binary search walkthrough](#demonstrate-the-app). It shows the complete learning flow in one exercise.
 
 ## Open and run
 
@@ -15,6 +21,13 @@ From the project root on Windows:
 .\gradlew.bat connectedDebugAndroidTest
 ```
 Use `./gradlew` on macOS and Linux. The second command needs a running emulator or connected device. The APK built by the first command is written to `app/build/outputs/apk/debug/app-debug.apk`. No API keys, cloud database, or deployed backend are needed.
+
+## Demonstrate the app
+
+1. **Trace and practise.** Open **Algorithms → Halve the search interval**. In **Example 1**, step through the search for 16 in `[2, 4, 7, 11, 16, 23]` until it reaches index 4. Choose **Open coding exercise → Run samples** with the default starter. Example 1 reports `expected 4, got -1`. Choose **Review example 1 steps** to replay that input inside the results card. Close the trace and check that the editor still contains the draft.
+2. **Save and reopen progress.** Choose **Submit solution**, then go to **View statistics** from home and find the new practice entry. Stop and relaunch the app to check that the entry persists. Choose **Open practice** on that entry to reopen the matching lesson and current practice draft. From the lesson-to-practice route, Android Back returns to the existing trace at its previous step.
+3. **Read online and offline.** In the lesson, read the disclosure above **Further reading**, then open it with an internet connection. Wait for **Reading updated from Wikipedia**. Disconnect the device and choose **Refresh article**. The page reports **Refresh unavailable. Showing your saved copy.** and keeps the dated excerpt visible. Reconnect after checking.
+4. **Check progress controls.** With disposable test data, choose **Settings → Clear progress → Cancel** and verify that the history remains. Repeat and choose **Delete progress**. Room removes saved submissions and drafts in a single transaction and retains settings and cached readings.
 
 ## Two study paths
 
@@ -43,13 +56,6 @@ The editor runs a small, bounded Python teaching subset on the device. Implement
 | `data/StudyDatabase.kt` | Room tables for submissions, drafts, preferences and readings |
 | `data/WikipediaSource.kt` | MediaWiki HTTPS API request for a curated subject, attribution URL, response validation and cache |
 | `data/ReviewWorker.kt` | Unique periodic WorkManager job. Posts an opt-in reminder if a previously attempted problem has never been solved |
-
-## Demonstrate the app
-
-1. **Trace and practise.** Open **Algorithms → Halve the search interval**. In **Example 1**, step through the search for 16 in `[2, 4, 7, 11, 16, 23]` until it reaches index 4. Choose **Open coding exercise → Run samples** with the default starter. Example 1 reports `expected 4, got -1`. Choose **Review example 1 steps** to replay that input inside the results card. Close the trace and check that the editor still contains the draft.
-2. **Save and reopen progress.** Choose **Submit solution**, then go to **View statistics** from home and find the new practice entry. Stop and relaunch the app to check that the entry persists. Choose **Open practice** on that entry to reopen the matching lesson and current practice draft. From the lesson-to-practice route, Android Back returns to the existing trace at its previous step.
-3. **Read online and offline.** In the lesson, read the disclosure above **Further reading**, then open it with an internet connection. Wait for **Reading updated from Wikipedia**. Disconnect the device and choose **Refresh article**. The page reports **Refresh unavailable. Showing your saved copy.** and keeps the dated excerpt visible. Reconnect after checking.
-4. **Check progress controls.** With disposable test data, choose **Settings → Clear progress → Cancel** and verify that the history remains. Repeat and choose **Delete progress**. Room removes saved submissions and drafts in a single transaction and retains settings and cached readings.
 
 ## Privacy and user control
 
