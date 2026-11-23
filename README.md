@@ -1,11 +1,11 @@
 # AlgoSteps
 
-An Android study app for first-year computing students who can read a loop but need practice turning an algorithm into working code. An algorithm lesson and a coding exercise share the same two examples, so a student can compare a handwritten trace with their program's output.
+AlgoSteps is an Android app for first-year computing students. Trace an algorithm step by step, implement it using the same example inputs, and review the trace when a practice sample fails. Saved submissions appear in **View statistics**, where learners can reopen the matching exercise and draft.
 
 ## Open and run
 
-1. Extract the ZIP into a writable directory. In Android Studio, open the **AlgoSteps** folder containing `settings.gradle.kts`.
-2. Install **Android SDK Platform 35** and the Android SDK Build Tools requested by Gradle. Use Gradle JDK 17 or a compatible bundled JDK, accept the SDK licences and let the included Gradle wrapper sync. First sync needs internet access to Google Maven, Maven Central, the Gradle plugin portal and the distribution host.
+1. Clone this repository or extract the project ZIP. In Android Studio, open the project root containing `settings.gradle.kts`.
+2. Install **Android SDK Platform 35** and the Android SDK Build Tools requested by Gradle. Use Gradle JDK 17 (used by CI) or JDK 21, accept the SDK licences and sync with the included Gradle 8.13 wrapper. First sync needs internet access to Google Maven, Maven Central, the Gradle plugin portal and the distribution host.
 3. Start an API 35 virtual device in Device Manager, or connect an Android 8.0+ phone with USB debugging. Select the device and run the **app** configuration. An API 33+ device is needed to exercise the notification permission prompt.
 4. The lessons, editor, judge and statistics run on the device. Open **Algorithms → a lesson → Further reading** to fetch the live article. A successful fetch leaves a cached copy for offline use.
 
@@ -46,22 +46,27 @@ The editor runs a small, bounded Python teaching subset on the device. Implement
 
 ## Demonstrate the app
 
-1. Open **Algorithms → Halve the search interval**. For target 16 in `[2, 4, 7, 11, 16, 23]`, trace index 2 (value 7) and index 4 (value 16). Switch examples to see the case where the target is absent.
-2. Select **Open coding exercise**. Run the unchanged starter and compare its output against the public cases. Open the code walkthrough and examine why `low <= high` includes a one-element interval. Edit and resubmit a solution. **View statistics** displays the new outcome, test count and date.
-3. Enter the same problem from **Coding → Exam**. Check that the practice draft and walkthrough are kept separate. Review the answer after submitting.
-4. In an algorithm lesson, load **Further reading** while connected, wait for **Reading updated from Wikipedia**, then disconnect and refresh. The dated saved article remains available. On a first offline visit, the page explains how to retry.
-5. Under **Settings**, switch hints, test permission denial/grant on Android 13+, and confirm that learning remains available. With explicit opt-in, the app schedules a daily review check, first eligible roughly 24 hours later. It only posts if there is a never-solved attempt. Android schedules the actual delivery time. Use Android Studio's Background Task Inspector to inspect the scheduled worker.
-6. Under **Settings → Clear progress**, cancel once and verify your history remains. Confirm to remove submissions and drafts. The public reading cache and preferences remain available.
+1. **Trace and practise.** Open **Algorithms → Halve the search interval**. In **Example 1**, step through the search for 16 in `[2, 4, 7, 11, 16, 23]` until it reaches index 4. Choose **Open coding exercise → Run samples** with the default starter. Example 1 reports `expected 4, got -1`. Choose **Review example 1 steps** to replay that input inside the results card. Close the trace and check that the editor still contains the draft.
+2. **Save and reopen progress.** Choose **Submit solution**, then go to **View statistics** from home and find the new practice entry. Stop and relaunch the app to check that the entry persists. Choose **Open practice** on that entry to reopen the matching lesson and current practice draft. From the lesson-to-practice route, Android Back returns to the existing trace at its previous step.
+3. **Read online and offline.** In the lesson, read the disclosure above **Further reading**, then open it with an internet connection. Wait for **Reading updated from Wikipedia**. Disconnect the device and choose **Refresh article**. The page reports **Refresh unavailable. Showing your saved copy.** and keeps the dated excerpt visible. Reconnect after checking.
+4. **Check progress controls.** With disposable test data, choose **Settings → Clear progress → Cancel** and verify that the history remains. Repeat and choose **Delete progress**. Room removes saved submissions and drafts in a single transaction and retains settings and cached readings.
 
-## Ethics, testing and course submission
+## Privacy and user control
 
-The app stores learners' drafts and results locally and disables Android backup for this project. Article requests send a curated public title to Wikipedia, along with normal HTTP connection metadata. The user can decline reminders or delete progress. Labels accompany colour feedback and the layout supports larger fonts and system dark mode. Wikipedia excerpts show the article link and CC BY-SA licence.
+Code is evaluated on the device, where Room stores drafts and scores. The app disables Android backup. The lesson explains the Wikipedia request before opening **Further reading**. The request includes a curated public article title and ordinary connection metadata. Excerpts link to the source and licence. Study reminders are opt-in and can be declined while continuing to use the learning features.
 
-JVM tests cover grading behavior and curriculum consistency. Instrumentation tests exercise Compose interactions, Room persistence and parsing. A GitHub Actions workflow runs the project checks on pushes or pull requests once the repository is created. The Chinese guide provides first-run steps and a course rubric crosswalk.
+## Verification
 
-Version 1.1.1 passed 20 host tests. In earlier live checks, the four curated MediaWiki requests returned an introductory extract and HTTPS article URL. To test the full suite on a computer, run `./gradlew -I gradle/host-tests.gradle :app:testDebugUnitTest` or use `.\gradlew.bat` on Windows. Physical installation and scheduled notification delivery can be checked on the demo phone.
+JVM tests cover grading and curriculum logic. Android tests cover Compose interactions, navigation, Room persistence and Wikipedia response parsing.
 
-For the individual assessment, maintain your own GitHub repository, document actual changes in regular commits, and grant the lecturer and subject coordinator access. Submit the Android Studio project export, the repository link, the personal two-page / 1,000-word Gibbs reflection about **your Assessment 2** and your AI-generated material declaration. Disclose the generation of this starting project, including the code, original practice material, tests and documentation you retain. Document what you personally changed and verified. Only describe observations you actually made.
+| Check | Recorded result |
+| --- | --- |
+| GitHub Actions on commit `9f55eb4` | `build` and `device-tests` passed. The workflow uses JDK 17 and an API 35 emulator for the device suite. |
+| Binary search on the local emulator | Verified the failed-sample trace, return to the previous lesson step, and reopening the matching practice draft from statistics after restarting. |
+| Wikipedia and Room on the local emulator | Verified live loading, offline refresh with the same saved excerpt, and submission persistence after restarting. Eight repository and parser tests passed using the Android test runner. |
+| Clear progress on the local emulator | Cancel kept the test submission. Confirming deletion removed the submission from statistics. |
+
+Use an **API 35** emulator to reproduce the CI device tests. On the local API 37.2 emulator, Espresso failed to initialize during the automated exam-history test, before its navigation assertions ran. See [GitHub Actions](https://github.com/yingkailiang-27/CP3406_Assessment3/actions) for the workflow results.
 
 ## Sources
 
