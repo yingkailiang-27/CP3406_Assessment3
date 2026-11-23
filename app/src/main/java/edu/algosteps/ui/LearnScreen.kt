@@ -35,6 +35,7 @@ import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import edu.algosteps.content.Lesson
@@ -49,13 +50,14 @@ fun LearnScreen(lesson: Lesson, onPractice: () -> Unit, onBack: () -> Unit, onRe
         Text(
             lesson.title,
             style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold,
             modifier = Modifier.semantics { heading() }
         )
         Text(lesson.idea, style = MaterialTheme.typography.bodyLarge)
         Walkthrough(lesson)
+        Button(onClick = onPractice, modifier = Modifier.fillMaxWidth()) { Text("Open coding exercise") }
         LessonText("Why it works", lesson.invariant)
         LessonText("Time and space", lesson.complexity)
-        Button(onClick = onPractice, modifier = Modifier.fillMaxWidth()) { Text("Open coding exercise") }
         Text(
             text = "Further reading requests a public article from Wikipedia. Your code drafts and scores stay on this device.",
             style = MaterialTheme.typography.bodyMedium
@@ -81,9 +83,10 @@ internal fun Walkthrough(lesson: Lesson, sampleIndex: Int? = null) {
     val input = lesson.samples[example]
     val steps = remember(lesson.id, example) { lesson.trace(input) }
     val frame = steps[position]
+    val colors = MaterialTheme.colorScheme
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surfaceVariant,
+        color = colors.surfaceVariant,
         shape = MaterialTheme.shapes.large
     ) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -105,7 +108,18 @@ internal fun Walkthrough(lesson: Lesson, sampleIndex: Int? = null) {
                     }
                 }
             }
-            Text("${lesson.targetLabel} = ${input.target}", style = MaterialTheme.typography.titleSmall)
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = colors.surface,
+                shape = MaterialTheme.shapes.medium
+            ) {
+                Text(
+                    "${lesson.targetLabel} = ${input.target}",
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
             Row(
                 modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -125,11 +139,17 @@ internal fun Walkthrough(lesson: Lesson, sampleIndex: Int? = null) {
                         modifier = Modifier.clearAndSetSemantics {
                             contentDescription = "Index $index, value $value$state"
                         },
-                        horizontalAlignment = Alignment.CenterHorizontally
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
+                        Text("[$index]", style = MaterialTheme.typography.labelMedium)
                         Surface(
-                            color = if (active) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
-                            contentColor = if (active) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
+                            color = when {
+                                active -> colors.primary
+                                ruledOut -> colors.surfaceVariant
+                                else -> colors.surface
+                            },
+                            contentColor = if (active) colors.onPrimary else colors.onSurface,
                             shape = MaterialTheme.shapes.small
                         ) {
                             Text(
@@ -137,20 +157,12 @@ internal fun Walkthrough(lesson: Lesson, sampleIndex: Int? = null) {
                                 fontFamily = FontFamily.Monospace,
                                 fontWeight = if (active) FontWeight.Bold else FontWeight.Normal,
                                 textDecoration = if (ruledOut) TextDecoration.LineThrough else TextDecoration.None,
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.widthIn(min = 38.dp).padding(horizontal = 8.dp, vertical = 8.dp)
                             )
                         }
-                        Text("[$index]", style = MaterialTheme.typography.labelSmall)
                     }
                 }
-            }
-            Column(
-                modifier = Modifier.fillMaxWidth().semantics { liveRegion = LiveRegionMode.Polite },
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Text("Step ${position + 1} of ${steps.size}", style = MaterialTheme.typography.labelMedium)
-                Text(frame.title, style = MaterialTheme.typography.titleMedium)
-                Text(frame.detail, style = MaterialTheme.typography.bodyMedium)
             }
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -164,6 +176,21 @@ internal fun Walkthrough(lesson: Lesson, sampleIndex: Int? = null) {
                     OutlinedButton(onClick = { position = 0 }) { Text("Replay") }
                 } else {
                     Button(onClick = { position = (position + 1).coerceAtMost(steps.lastIndex) }) { Text("Next step") }
+                }
+            }
+            Surface(
+                modifier = Modifier.fillMaxWidth().semantics { liveRegion = LiveRegionMode.Polite },
+                color = colors.surface,
+                shape = MaterialTheme.shapes.medium
+            ) {
+                Column(
+                    modifier = Modifier.padding(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text("Step ${position + 1} of ${steps.size}", color = colors.primary,
+                        style = MaterialTheme.typography.labelMedium)
+                    Text(frame.title, style = MaterialTheme.typography.titleMedium)
+                    Text(frame.detail, style = MaterialTheme.typography.bodyMedium)
                 }
             }
         }

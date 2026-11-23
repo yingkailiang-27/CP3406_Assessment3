@@ -1,5 +1,6 @@
 package edu.algosteps.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
@@ -63,8 +64,9 @@ internal fun HomeContent(
         }
         item {
             Text(
-                text = "Trace an algorithm step by step, then practise coding it with the same inputs.",
-                style = MaterialTheme.typography.bodyMedium
+                text = "Trace an algorithm, then write and test your code.",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold
             )
         }
         item {
@@ -83,7 +85,10 @@ internal fun HomeContent(
             }
         }
         item {
-            OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            ) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("Your progress", style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.semantics { heading() })
@@ -105,21 +110,34 @@ internal fun HomeContent(
 @Composable
 private fun TrackCard(coding: Boolean, onClick: () -> Unit, modifier: Modifier) {
     val colors = MaterialTheme.colorScheme
-    Card(
-        onClick = onClick, modifier = modifier, shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (coding) colors.tertiaryContainer else colors.primaryContainer,
-            contentColor = if (coding) colors.onTertiaryContainer else colors.onPrimaryContainer
-        )
+    Surface(
+        onClick = onClick,
+        modifier = modifier,
+        shape = RoundedCornerShape(20.dp),
+        color = if (coding) colors.surface else colors.primary,
+        contentColor = if (coding) colors.onSurface else colors.onPrimary,
+        border = if (coding) BorderStroke(1.dp, colors.outline) else null
     ) {
-        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            val ink = LocalContentColor.current
-            TrackMark(coding, ink)
-            Text(if (coding) "Coding" else "Algorithms",
-                style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-            Text(if (coding) "Read code, run samples and submit a solution."
-                else "Trace algorithms step by step on example inputs.",
-                style = MaterialTheme.typography.bodyMedium)
+        Row(
+            modifier = Modifier.padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            TrackMark(coding, LocalContentColor.current)
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    if (coding) "Coding" else "Algorithms",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    if (coding) "Write code and run sample tests." else "Follow worked examples step by step.",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
         }
     }
 }
@@ -164,6 +182,24 @@ internal fun StatsContent(stats: DashboardStats?, onBack: () -> Unit, onRetry: (
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         item { PageTitle("Statistics", onBack) }
+        if (stats != null) item {
+            val total = Curriculum.lessons.size
+            val solved = curriculum.keys.count { it in stats.solvedTopics }
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Learning progress", style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.semantics { heading() })
+                    Text("$solved of $total problems solved", style = MaterialTheme.typography.headlineSmall)
+                    LinearProgressIndicator(
+                        progress = { solved.toFloat() / total.coerceAtLeast(1) },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
+        }
         if (stats == null) {
             item { Text("Loading submissions…") }
         } else if (stats.submissions.isEmpty()) {
@@ -180,8 +216,11 @@ internal fun StatsContent(stats: DashboardStats?, onBack: () -> Unit, onRetry: (
                         val percent = (modeStats.accepted * 100.0 / count).roundToInt()
                         Text("$percent% accepted", style = MaterialTheme.typography.headlineMedium)
                         Text("${modeStats.accepted} of $count submissions passed every test.")
-                        Text("${count - modeStats.accepted} submissions need work · ${modeStats.solvedTopics.size} problems solved",
-                            style = MaterialTheme.typography.bodySmall)
+                        val needsWork = count - modeStats.accepted
+                        Text(
+                            if (needsWork == 1) "1 submission needs work" else "$needsWork submissions need work",
+                            style = MaterialTheme.typography.bodySmall
+                        )
                     }
                 }
             }
@@ -211,12 +250,26 @@ internal fun StatsContent(stats: DashboardStats?, onBack: () -> Unit, onRetry: (
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
                         Text(lesson?.title ?: attempt.lessonId, style = MaterialTheme.typography.titleMedium)
                         Text(attempt.mode.label, style = MaterialTheme.typography.labelMedium)
-                        Text(if (attempt.accepted) "Accepted" else "Needs work", fontWeight = FontWeight.SemiBold)
+                        val colors = MaterialTheme.colorScheme
+                        Surface(
+                            shape = MaterialTheme.shapes.small,
+                            color = if (attempt.accepted) colors.primaryContainer else colors.errorContainer,
+                            contentColor = if (attempt.accepted) colors.onPrimaryContainer else colors.onErrorContainer
+                        ) {
+                            Text(
+                                if (attempt.accepted) "Accepted" else "Needs work",
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                style = MaterialTheme.typography.labelLarge
+                            )
+                        }
                         Text("${attempt.passed}/${attempt.total} tests passed · ${dateFormat.format(Date(attempt.submittedAt))}",
                             style = MaterialTheme.typography.bodySmall)
                         if (lesson != null) {
                             val action = if (attempt.mode == SubmissionMode.EXAM) "Open exam" else "Open practice"
-                            TextButton(onClick = { onRetry(lesson.id, attempt.mode) }) { Text(action) }
+                            OutlinedButton(
+                                onClick = { onRetry(lesson.id, attempt.mode) },
+                                modifier = Modifier.fillMaxWidth()
+                            ) { Text(action) }
                         }
                     }
                 }

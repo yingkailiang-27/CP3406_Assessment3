@@ -77,19 +77,30 @@ internal fun CodingContent(
             Text("Loading your draft…", modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
             return@Column
         }
-        CodeEditor(lesson.id, examMode, state.source, !state.running, onEdit)
-        state.draftMessage?.let {
-            Text(it, color = MaterialTheme.colorScheme.error)
-            if (it.startsWith("Couldn't save")) {
-                TextButton(onClick = onRetryDraft) { Text("Retry saving draft") }
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.large,
+            color = MaterialTheme.colorScheme.surfaceVariant
+        ) {
+            Column(
+                modifier = Modifier.padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                CodeEditor(lesson.id, examMode, state.source, !state.running, onEdit)
+                state.draftMessage?.let {
+                    Text(it, color = MaterialTheme.colorScheme.error)
+                    if (it.startsWith("Couldn't save")) {
+                        TextButton(onClick = onRetryDraft) { Text("Retry saving draft") }
+                    }
+                }
+                TextButton(onClick = { languageGuide = !languageGuide }) {
+                    Text(if (languageGuide) "Hide language guide" else "Supported Python syntax")
+                }
+                if (languageGuide) {
+                    Text("Use integers, variables, len(nums), nums[i], arithmetic (+, -, *, //, %), comparisons, if/elif/else, while and for. Iterate over nums or range(...). Use spaces to indent and return one integer. Imports, print and changes to the input list are unavailable.",
+                        style = MaterialTheme.typography.bodySmall)
+                }
             }
-        }
-        TextButton(onClick = { languageGuide = !languageGuide }) {
-            Text(if (languageGuide) "Hide language guide" else "Supported Python syntax")
-        }
-        if (languageGuide) {
-            Text("Use integers, variables, len(nums), nums[i], arithmetic (+, -, *, //, %), comparisons, if/elif/else, while and for. Iterate over nums or range(...). Use spaces to indent and return one integer. Imports, print and changes to the input list are unavailable.",
-                style = MaterialTheme.typography.bodySmall)
         }
         if (!examMode && showHints) {
             Text("Hint · ${lesson.invariant}",
@@ -98,15 +109,20 @@ internal fun CodingContent(
         if (examMode && !canSeeSolution) {
             Text("Submit to record your score and unlock the code walkthrough.", style = MaterialTheme.typography.bodyMedium)
         }
-        OutlinedButton(
-            onClick = { onEvaluate(false) }, enabled = !state.running && state.source.isNotBlank(),
-            modifier = Modifier.fillMaxWidth()
-        ) { Text("Run samples") }
-        Button(
-            onClick = { onEvaluate(true) },
-            enabled = !state.running && state.source.isNotBlank() && !state.alreadySubmitted,
-            modifier = Modifier.fillMaxWidth()
-        ) { Text(if (state.alreadySubmitted) "Submission recorded" else "Submit solution") }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            OutlinedButton(
+                onClick = { onEvaluate(false) }, enabled = !state.running && state.source.isNotBlank(),
+                modifier = Modifier.weight(1f)
+            ) { Text("Run samples") }
+            Button(
+                onClick = { onEvaluate(true) },
+                enabled = !state.running && state.source.isNotBlank() && !state.alreadySubmitted,
+                modifier = Modifier.weight(1f)
+            ) { Text(if (state.alreadySubmitted) "Submission recorded" else "Submit solution") }
+        }
         if (state.running) {
             LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             Text("Checking your solution…", Modifier.semantics { liveRegion = LiveRegionMode.Polite })
@@ -186,14 +202,29 @@ private fun ResultCard(report: Evaluation, lesson: Lesson, examMode: Boolean) {
                     result.error != null -> "Error · ${result.error}"
                     else -> "Failed · expected ${result.example.expected}, got ${result.actual}"
                 }
-                Text("Example ${index + 1}: $summary", color = if (result.passed) LocalContentColor.current
-                    else MaterialTheme.colorScheme.error)
-                if (!examMode && !result.passed) {
-                    val expanded = reviewedSample == index
-                    TextButton(onClick = { reviewedSample = if (expanded) null else index }) {
-                        Text(if (expanded) "Hide example ${index + 1} steps" else "Review example ${index + 1} steps")
+                val colors = MaterialTheme.colorScheme
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.medium,
+                    color = if (result.passed) colors.surfaceVariant else colors.errorContainer,
+                    contentColor = if (result.passed) colors.onSurfaceVariant else colors.onErrorContainer
+                ) {
+                    Column(
+                        modifier = Modifier.padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Text("Example ${index + 1}: $summary")
+                        if (!examMode && !result.passed) {
+                            val expanded = reviewedSample == index
+                            OutlinedButton(
+                                onClick = { reviewedSample = if (expanded) null else index },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(if (expanded) "Hide example ${index + 1} steps" else "Review example ${index + 1} steps")
+                            }
+                            if (expanded) Walkthrough(lesson, sampleIndex = index)
+                        }
                     }
-                    if (expanded) Walkthrough(lesson, sampleIndex = index)
                 }
             }
             if (report.submitted) {

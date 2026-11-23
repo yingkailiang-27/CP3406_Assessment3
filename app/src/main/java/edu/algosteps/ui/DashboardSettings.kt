@@ -11,7 +11,9 @@ import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -141,21 +143,32 @@ fun SettingsScreen(viewModel: DashboardViewModel, onBack: () -> Unit) {
 }
 
 @Composable
-private fun Preference(
-    name: String, detail: String, checked: Boolean, changed: (Boolean) -> Unit
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth()
-            .toggleable(value = checked, role = Role.Switch, onValueChange = changed)
-            .padding(vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
+private fun SettingsHeading(title: String) {
+    Text(
+        title,
+        modifier = Modifier.semantics { heading() },
+        color = MaterialTheme.colorScheme.primary,
+        style = MaterialTheme.typography.titleLarge
+    )
+}
+
+@Composable
+private fun Preference(name: String, checked: Boolean, changed: (Boolean) -> Unit) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.medium,
+        color = MaterialTheme.colorScheme.surfaceVariant
     ) {
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-            Text(name, style = MaterialTheme.typography.titleMedium)
-            Text(detail, style = MaterialTheme.typography.bodyMedium)
+        Row(
+            modifier = Modifier.fillMaxWidth()
+                .toggleable(value = checked, role = Role.Switch, onValueChange = changed)
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(name, Modifier.weight(1f), style = MaterialTheme.typography.titleMedium)
+            Switch(checked = checked, onCheckedChange = null)
         }
-        Switch(checked = checked, onCheckedChange = null)
     }
 }
 
@@ -167,31 +180,45 @@ internal fun SettingsContent(
     onDeviceSettings: () -> Unit, onClear: () -> Unit
 ) {
     var confirmClear by rememberSaveable { mutableStateOf(false) }
-    LazyColumn(modifier.fillMaxSize(), contentPadding = PaddingValues(20.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        item { PageTitle("Settings", onBack) }
-        item {
-            Preference("Practice hints", "Show teaching hints while practising code.", showHints, onHints)
-            HorizontalDivider()
-            Preference("Review reminders", "A daily check can remind you about an attempted problem you have yet to solve.",
-                reminders, onReminders)
+    Column(
+        modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(20.dp)
+    ) {
+        PageTitle("Settings", onBack)
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            SettingsHeading("Coding practice")
+            Preference("Show hints", showHints, onHints)
+        }
+        HorizontalDivider()
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            SettingsHeading("Study reminders")
+            Preference("Review reminders", reminders, onReminders)
+            Text(
+                "Get a reminder to revisit a problem you tried but have not solved.",
+                style = MaterialTheme.typography.bodyMedium
+            )
             if (showDeviceLink) {
                 Text("Device notifications are blocked. Allow them in system settings to receive reminders.")
                 TextButton(onClick = onDeviceSettings) { Text("Open notification settings") }
             }
             if (settingsUnavailable) Text("Open your device’s Settings, then Apps, AlgoSteps and Notifications.")
         }
-        item {
-            OutlinedCard(Modifier.fillMaxWidth()) {
-                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Learning data", style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.semantics { heading() })
-                    Text("Your code drafts and results are saved on this device. Clearing progress removes both.")
-                    Text("Online readings send the article title to Wikipedia. Your code and scores stay on this device.",
-                        style = MaterialTheme.typography.bodySmall)
-                    OutlinedButton(onClick = { confirmClear = true }) { Text("Clear progress") }
-                }
+        HorizontalDivider()
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            SettingsHeading("Learning data")
+            Text("Your code drafts and scores are stored on this device.", style = MaterialTheme.typography.bodyMedium)
+            OutlinedButton(
+                onClick = { confirmClear = true },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.error)
+            ) {
+                Text("Clear progress")
             }
+            Text(
+                "Deletes saved submissions and code drafts.",
+                style = MaterialTheme.typography.bodySmall
+            )
         }
     }
     if (confirmClear) {
