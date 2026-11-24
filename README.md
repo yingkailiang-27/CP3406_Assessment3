@@ -2,7 +2,7 @@
 
 **AlgoSteps is an Android learning app that helps first-year computing students practise search and array algorithms by tracing examples and writing Python code.**
 
-1. **Algorithms** shows how an algorithm processes an example, one step at a time.
+1. **Algorithms** shows how an algorithm processes an example, one step at a time. In **Binary search**, students also predict which half to search on a new input and get feedback before moving on to code.
 2. **Coding** lets students write and run a solution on the same inputs. When a practice sample fails, they can compare the expected and actual results and replay that exact example beside the feedback.
 3. **View statistics** shows saved results and lets students reopen an exercise with its draft. **Settings** lets them adjust hints and clear their learning progress.
 
@@ -24,7 +24,7 @@ Use `./gradlew` on macOS and Linux. The second command needs a running emulator 
 
 ## Demonstrate the app
 
-1. **Trace and practise.** Open **Algorithms → Binary search**. In **Example 1**, step through the search for 16 in `[2, 4, 7, 11, 16, 23]` until it reaches index 4. Choose **Open coding exercise → Run samples** with the default starter. Example 1 reports `expected 4, got -1`. Choose **Review example 1 steps** to replay that input inside the results card. Close the trace and check that the editor still contains the draft.
+1. **Trace and practise.** Open **Algorithms → Binary search**. In **Example 1**, step through the search for 16 in `[2, 4, 7, 11, 16, 23]` until it reaches index 4. Under **Predict the next step**, try **Search right**, read the hint, then choose **Search left** to see why the sorted order rules out the right half. Choose **Open coding exercise → Run samples** with the default starter. Example 1 reports `expected 4, got -1`. Choose **Review example 1 steps** to replay that input inside the results card. Close the trace and check that the editor still contains the draft.
 2. **Save and reopen progress.** Choose **Submit solution**, then go to **View statistics** from home and find the new practice entry. Stop and relaunch the app to check that the entry persists. Choose **Open practice** on that entry to reopen the matching lesson and current practice draft. From the lesson-to-practice route, Android Back returns to the existing trace at its previous step.
 3. **Read online and offline.** In the lesson, read the disclosure above **Further reading**, then open it with an internet connection. Wait for **Reading updated from Wikipedia**. Disconnect the device and choose **Refresh article**. The page reports **Refresh unavailable. Showing your saved copy.** and keeps the dated excerpt visible. Reconnect after checking.
 4. **Check progress controls.** With disposable test data, choose **Settings → Clear progress → Cancel** and verify that the history remains. Repeat and choose **Delete progress**. Room removes saved submissions and drafts in a single transaction and retains settings and cached readings.
@@ -68,6 +68,7 @@ JVM tests cover grading and curriculum logic. Android tests cover Compose intera
 | Check | Recorded result |
 | --- | --- |
 | GitHub Actions on commit `9f55eb4` | `build` and `device-tests` passed. The workflow uses JDK 17 and an API 35 emulator for the device suite. |
+| Commit `c42e6e3` | The GitHub Actions `build` job passed. The API 35 `device-tests` job passed on rerun after the first attempt could not resolve the KSP plugin. On a clean local installation, the binary search walkthrough, prediction feedback and retry, and failed-sample review passed a manual check. |
 | Binary search on the local emulator | Verified the failed-sample trace, return to the previous lesson step, and reopening the matching practice draft from statistics after restarting. |
 | Wikipedia and Room on the local emulator | Verified live loading, offline refresh with the same saved excerpt, and submission persistence after restarting. Eight repository and parser tests passed using the Android test runner. |
 | Clear progress on the local emulator | Cancel kept the test submission. Confirming deletion removed the submission from statistics. |
