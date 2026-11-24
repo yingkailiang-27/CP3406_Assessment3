@@ -55,7 +55,24 @@ fun LearnScreen(lesson: Lesson, onPractice: () -> Unit, onBack: () -> Unit, onRe
         )
         Text(lesson.idea, style = MaterialTheme.typography.bodyLarge)
         Walkthrough(lesson)
-        if (lesson.id == "binary-search") BinarySearchPrediction()
+        when (lesson.id) {
+            "binary-search" -> PredictionQuestion(
+                prompt = "Find 6 in [2, 6, 9, 15, 22]. The middle value is 9. Which side should you search next?",
+                correctOption = "Search left",
+                incorrectOption = "Search right",
+                explanation = "Correct. In a sorted list, every value to the right of 9 is larger than 9. Since 6 is smaller, search to the left.",
+                hint = "Try again. Is 6 smaller or larger than the middle value, 9?"
+            )
+            "window-sum" -> PredictionQuestion(
+                prompt = "A window of width 2 starts at [3, 8] in [3, 8, 2, 6]. " +
+                    "It moves one place to the right. How should you update the sum?",
+                correctOption = "Subtract 3, add 2",
+                incorrectOption = "Subtract 8, add 2",
+                explanation = "Correct. The window moves from [3, 8] to [8, 2]. " +
+                    "Keep 8, subtract 3 and add 2. The sum changes from 11 to 10.",
+                hint = "Try again. Which number leaves the window when it moves one place to the right?"
+            )
+        }
         Button(onClick = onPractice, modifier = Modifier.fillMaxWidth()) { Text("Open coding exercise") }
         LessonText("Why it works", lesson.invariant)
         LessonText("Time and space", lesson.complexity)
@@ -69,7 +86,13 @@ fun LearnScreen(lesson: Lesson, onPractice: () -> Unit, onBack: () -> Unit, onRe
 }
 
 @Composable
-private fun BinarySearchPrediction() {
+private fun PredictionQuestion(
+    prompt: String,
+    correctOption: String,
+    incorrectOption: String,
+    explanation: String,
+    hint: String
+) {
     var answer by rememberSaveable { mutableIntStateOf(-1) }
     val colors = MaterialTheme.colorScheme
     Surface(
@@ -86,24 +109,20 @@ private fun BinarySearchPrediction() {
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.semantics { heading() }
             )
-            Text("Find 6 in [2, 6, 9, 15, 22]. The middle value is 9. Which side should you search next?")
+            Text(prompt)
             FilterChip(
                 selected = answer == 0,
                 onClick = { answer = 0 },
-                label = { Text("Search left") }
+                label = { Text(correctOption) }
             )
             FilterChip(
                 selected = answer == 1,
                 onClick = { answer = 1 },
-                label = { Text("Search right") }
+                label = { Text(incorrectOption) }
             )
             if (answer >= 0) {
                 Text(
-                    text = if (answer == 0) {
-                        "Correct. In a sorted list, every value to the right of 9 is larger than 9. Since 6 is smaller, search to the left."
-                    } else {
-                        "Try again. Is 6 smaller or larger than the middle value, 9?"
-                    },
+                    text = if (answer == 0) explanation else hint,
                     modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
                     color = if (answer == 0) colors.onSurfaceVariant else colors.error,
                     style = MaterialTheme.typography.bodyMedium
