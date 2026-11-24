@@ -2,7 +2,7 @@
 
 **AlgoSteps is an Android learning app that helps first-year computing students practise search and array algorithms by tracing examples and writing Python code.**
 
-1. **Algorithms** shows how an algorithm processes an example, one step at a time. In **Binary search**, students also predict which half to search on a new input and get feedback before moving on to code.
+1. **Algorithms** shows how an algorithm processes an example, one step at a time. Each of the four lessons ends its walkthrough with **Predict the next step**. Students make a choice on a new input, get a hint if needed and can retry before moving on to code.
 2. **Coding** lets students write and run a solution on the same inputs. When a practice sample fails, they can compare the expected and actual results and replay that exact example beside the feedback.
 3. **View statistics** shows saved results and lets students reopen an exercise with its draft. **Settings** lets them adjust hints and clear their learning progress.
 
@@ -31,14 +31,14 @@ Use `./gradlew` on macOS and Linux. The second command needs a running emulator 
 
 ## Two study paths
 
-| Lesson | Algorithm activity | Coding objective |
-| --- | --- | --- |
-| Linear search | Inspect an unsorted list from left to right | Return the first matching index, or −1 |
-| Count occurrences | Track a counter through an entire list | Return the frequency of a target value |
-| Binary search | Inspect the midpoint and discard part of a sorted list | Return the target index, including at either endpoint |
-| Fixed-size sliding window | Trace the value leaving and entering a fixed-size window | Return the largest window sum, including when all values are negative |
+| Lesson | Algorithm activity | Prediction | Coding objective |
+| --- | --- | --- | --- |
+| Linear search | Scan from left to right | Decide whether to stop at the first match | Return the first matching index, or −1 |
+| Count occurrences | Track a running count | Update the count when a repeated value matches | Return how often the target appears |
+| Binary search | Narrow the interval in a sorted list | Choose which half to search next | Return the matching index, or −1 |
+| Fixed-size sliding window | Track values entering and leaving the window | Choose which values to subtract and add | Return the largest fixed-width window sum |
 
-**Algorithms.** Step forward or back through two worked inputs. Each step names the active index or window, explains the decision, and leads into a correctness argument and time/space analysis.
+**Algorithms.** Step forward or back through two worked inputs. Each step names the active index or window and explains the decision. A prediction question, a correctness explanation, and a time and space analysis follow the walkthrough.
 
 **Coding.** Practice offers an editable starter, a topic-specific hint and a numbered worked solution with explanations. A single-problem exam keeps the worked solution behind the first recorded submission. Practice and exam drafts are separate. **Run samples** evaluates two public cases. **Submit solution** grades those cases plus six additional checks and saves the result. A sample run never changes statistics. The acceptance rate is the fraction of saved submissions that passed every check. The solved-problem count uses each distinct lesson that has ever passed.
 
@@ -69,6 +69,7 @@ JVM tests cover grading and curriculum logic. Android tests cover Compose intera
 | --- | --- |
 | GitHub Actions on commit `9f55eb4` | `build` and `device-tests` passed. The workflow uses JDK 17 and an API 35 emulator for the device suite. |
 | Commit `c42e6e3` | The GitHub Actions `build` job passed. The API 35 `device-tests` job passed on rerun after the first attempt could not resolve the KSP plugin. On a clean local installation, the binary search walkthrough, prediction feedback and retry, and failed-sample review passed a manual check. |
+| Commit `6386b01` | The API 35 `device-tests` job passed. The `build` job passed on rerun after the first attempt could not resolve the KSP plugin. |
 | Binary search on the local emulator | Verified the failed-sample trace, return to the previous lesson step, and reopening the matching practice draft from statistics after restarting. |
 | Wikipedia and Room on the local emulator | Verified live loading, offline refresh with the same saved excerpt, and submission persistence after restarting. Eight repository and parser tests passed using the Android test runner. |
 | Clear progress on the local emulator | Cancel kept the test submission. Confirming deletion removed the submission from statistics. |
