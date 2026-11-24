@@ -32,8 +32,8 @@ object Curriculum {
     val lessons = listOf(
         Lesson(
             id = "linear-search",
-            title = "Find the first match",
-            summary = "Use a linear search to locate an item in an unsorted list.",
+            title = "Linear search",
+            summary = "Scan an unsorted list to find the index of the first match.",
             difficulty = "Easy",
             prompt = "Return the zero-based index of the first value equal to target in nums. Return -1 if there is no match. The list may be empty and values may repeat.",
             starter = """
@@ -69,8 +69,8 @@ object Curriculum {
         ),
         Lesson(
             id = "count-occurrences",
-            title = "Count every match",
-            summary = "Carry a running count across one pass through a list.",
+            title = "Count occurrences",
+            summary = "Count how many times a target appears in one pass.",
             difficulty = "Easy",
             prompt = "Return how many values in nums equal target. Count every occurrence, including adjacent duplicates. An empty list has zero matches.",
             starter = """
@@ -108,8 +108,8 @@ object Curriculum {
         ),
         Lesson(
             id = "binary-search",
-            title = "Halve the search interval",
-            summary = "Use binary search to find a value in a sorted list.",
+            title = "Binary search",
+            summary = "Find a target in a sorted list by halving the search interval.",
             difficulty = "Medium",
             prompt = "nums contains distinct integers in increasing order. Return the zero-based index of target, or -1 if it is absent. nums may be empty.",
             starter = """
@@ -152,8 +152,8 @@ object Curriculum {
         ),
         Lesson(
             id = "window-sum",
-            title = "Slide a fixed window",
-            summary = "Find the largest total of k neighbouring values without re-adding every window.",
+            title = "Fixed-size sliding window",
+            summary = "Find the largest sum of k neighbouring values by updating a running sum.",
             difficulty = "Medium",
             prompt = "Here target is a window width k, with 1 ≤ k ≤ len(nums). Return the largest sum of any k consecutive values. Values may be negative. Return the sum itself.",
             starter = """

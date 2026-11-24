@@ -40,7 +40,7 @@ class NavigationFlowTest {
         app.onNodeWithText("Next step").performScrollTo().performClick()
         app.onNodeWithText("Open coding exercise").performScrollTo().performClick()
         app.onNodeWithText("Coding practice").assertIsDisplayed()
-        app.onNodeWithText("Find the first match").assertIsDisplayed()
+        app.onNodeWithText("Linear search").assertIsDisplayed()
         app.onNodeWithText("Back").performClick()
         app.onNodeWithText("Why it works").performScrollTo().assertIsDisplayed()
         app.onNodeWithText("Back to lessons").performScrollTo().performClick()

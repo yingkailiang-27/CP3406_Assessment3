@@ -24,7 +24,7 @@ Use `./gradlew` on macOS and Linux. The second command needs a running emulator 
 
 ## Demonstrate the app
 
-1. **Trace and practise.** Open **Algorithms → Halve the search interval**. In **Example 1**, step through the search for 16 in `[2, 4, 7, 11, 16, 23]` until it reaches index 4. Choose **Open coding exercise → Run samples** with the default starter. Example 1 reports `expected 4, got -1`. Choose **Review example 1 steps** to replay that input inside the results card. Close the trace and check that the editor still contains the draft.
+1. **Trace and practise.** Open **Algorithms → Binary search**. In **Example 1**, step through the search for 16 in `[2, 4, 7, 11, 16, 23]` until it reaches index 4. Choose **Open coding exercise → Run samples** with the default starter. Example 1 reports `expected 4, got -1`. Choose **Review example 1 steps** to replay that input inside the results card. Close the trace and check that the editor still contains the draft.
 2. **Save and reopen progress.** Choose **Submit solution**, then go to **View statistics** from home and find the new practice entry. Stop and relaunch the app to check that the entry persists. Choose **Open practice** on that entry to reopen the matching lesson and current practice draft. From the lesson-to-practice route, Android Back returns to the existing trace at its previous step.
 3. **Read online and offline.** In the lesson, read the disclosure above **Further reading**, then open it with an internet connection. Wait for **Reading updated from Wikipedia**. Disconnect the device and choose **Refresh article**. The page reports **Refresh unavailable. Showing your saved copy.** and keeps the dated excerpt visible. Reconnect after checking.
 4. **Check progress controls.** With disposable test data, choose **Settings → Clear progress → Cancel** and verify that the history remains. Repeat and choose **Delete progress**. Room removes saved submissions and drafts in a single transaction and retains settings and cached readings.
@@ -33,10 +33,10 @@ Use `./gradlew` on macOS and Linux. The second command needs a running emulator 
 
 | Lesson | Algorithm activity | Coding objective |
 | --- | --- | --- |
-| Find the first match | Inspect an unsorted list from left to right | Return the first matching index, or −1 |
-| Count every match | Track a counter through an entire list | Return the frequency of a target value |
-| Halve the search interval | Inspect the midpoint and discard part of a sorted list | Return the target index, including at either endpoint |
-| Slide a fixed window | Trace the value leaving and entering a fixed-size window | Return the largest window sum, including when all values are negative |
+| Linear search | Inspect an unsorted list from left to right | Return the first matching index, or −1 |
+| Count occurrences | Track a counter through an entire list | Return the frequency of a target value |
+| Binary search | Inspect the midpoint and discard part of a sorted list | Return the target index, including at either endpoint |
+| Fixed-size sliding window | Trace the value leaving and entering a fixed-size window | Return the largest window sum, including when all values are negative |
 
 **Algorithms.** Step forward or back through two worked inputs. Each step names the active index or window, explains the decision, and leads into a correctness argument and time/space analysis.
 
