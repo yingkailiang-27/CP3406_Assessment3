@@ -56,6 +56,14 @@ fun LearnScreen(lesson: Lesson, onPractice: () -> Unit, onBack: () -> Unit, onRe
         Text(lesson.idea, style = MaterialTheme.typography.bodyLarge)
         Walkthrough(lesson)
         when (lesson.id) {
+            "linear-search" -> PredictionQuestion(
+                prompt = "Search [4, 7, 2, 7] from left to right for the first 7. " +
+                    "You find 7 at index 1. What should you do next?",
+                correctOption = "Return index 1",
+                incorrectOption = "Keep searching",
+                explanation = "Correct. Index 1 is the first match because every earlier value has already been checked.",
+                hint = "Try again. The task asks for the first match. Would a later 7 change that answer?"
+            )
             "binary-search" -> PredictionQuestion(
                 prompt = "Find 6 in [2, 6, 9, 15, 22]. The middle value is 9. Which side should you search next?",
                 correctOption = "Search left",
