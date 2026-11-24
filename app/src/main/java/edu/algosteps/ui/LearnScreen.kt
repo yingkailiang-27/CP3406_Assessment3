@@ -64,6 +64,15 @@ fun LearnScreen(lesson: Lesson, onPractice: () -> Unit, onBack: () -> Unit, onRe
                 explanation = "Correct. Index 1 is the first match because every earlier value has already been checked.",
                 hint = "Try again. The task asks for the first match. Would a later 7 change that answer?"
             )
+            "count-occurrences" -> PredictionQuestion(
+                prompt = "Count the 5s in [5, 2, 5, 5]. After checking the first two values, the count is 1. " +
+                    "What should you do when you reach the 5 at index 2?",
+                correctOption = "Set count to 2 and keep going",
+                incorrectOption = "Keep count at 1 and move on",
+                explanation = "Correct. Each matching position counts, so the 5 at index 2 raises the count to 2. " +
+                    "Keep checking the list for more matches.",
+                hint = "Try again. The 5 at index 2 is a separate occurrence. What should that add to the count?"
+            )
             "binary-search" -> PredictionQuestion(
                 prompt = "Find 6 in [2, 6, 9, 15, 22]. The middle value is 9. Which side should you search next?",
                 correctOption = "Search left",
