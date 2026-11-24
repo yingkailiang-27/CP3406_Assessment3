@@ -55,6 +55,7 @@ fun LearnScreen(lesson: Lesson, onPractice: () -> Unit, onBack: () -> Unit, onRe
         )
         Text(lesson.idea, style = MaterialTheme.typography.bodyLarge)
         Walkthrough(lesson)
+        if (lesson.id == "binary-search") BinarySearchPrediction()
         Button(onClick = onPractice, modifier = Modifier.fillMaxWidth()) { Text("Open coding exercise") }
         LessonText("Why it works", lesson.invariant)
         LessonText("Time and space", lesson.complexity)
@@ -64,6 +65,51 @@ fun LearnScreen(lesson: Lesson, onPractice: () -> Unit, onBack: () -> Unit, onRe
         )
         OutlinedButton(onClick = onReading, modifier = Modifier.fillMaxWidth()) { Text("Further reading") }
         Spacer(Modifier.height(8.dp))
+    }
+}
+
+@Composable
+private fun BinarySearchPrediction() {
+    var answer by rememberSaveable { mutableIntStateOf(-1) }
+    val colors = MaterialTheme.colorScheme
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = colors.surfaceVariant,
+        shape = MaterialTheme.shapes.large
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                "Predict the next step",
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.semantics { heading() }
+            )
+            Text("Find 6 in [2, 6, 9, 15, 22]. The middle value is 9. Which side should you search next?")
+            FilterChip(
+                selected = answer == 0,
+                onClick = { answer = 0 },
+                label = { Text("Search left") }
+            )
+            FilterChip(
+                selected = answer == 1,
+                onClick = { answer = 1 },
+                label = { Text("Search right") }
+            )
+            if (answer >= 0) {
+                Text(
+                    text = if (answer == 0) {
+                        "Correct. In a sorted list, every value to the right of 9 is larger than 9. Since 6 is smaller, search to the left."
+                    } else {
+                        "Try again. Is 6 smaller or larger than the middle value, 9?"
+                    },
+                    modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+                    color = if (answer == 0) colors.onSurfaceVariant else colors.error,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        }
     }
 }
 
