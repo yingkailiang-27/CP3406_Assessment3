@@ -1,5 +1,7 @@
 package edu.algosteps
 
+import android.net.Uri
+
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
@@ -43,10 +45,17 @@ fun AlgoNavigation(repository: StudyRepository) {
     Surface(Modifier.fillMaxSize()) {
         NavHost(nav, startDestination = "home", modifier = Modifier.safeDrawingPadding()) {
             composable("home") {
-                HomeScreen(dashboard, { go("algorithms") }, { go("coding") }, { go("stats") }, { go("settings") })
+                HomeScreen(dashboard, { go("algorithms") }, { go("coding") }, { go("stats") }, { go("settings") },
+                    { query -> go("algorithms?query=${Uri.encode(query)}") })
             }
-            composable("algorithms") {
-                CollectionScreen(false, back, { id -> go("learn/$id") }, { _, _ -> })
+            composable(
+                "algorithms?query={query}",
+                arguments = listOf(navArgument("query") { defaultValue = ""; type = NavType.StringType })
+            ) { entry ->
+                CollectionScreen(
+                    false, back, { id -> go("learn/$id") }, { _, _ -> },
+                    initialQuery = entry.arguments?.getString("query").orEmpty()
+                )
             }
             composable("coding") {
                 CollectionScreen(true, back, { _ -> }, { id, exam -> go("solve/$id/$exam") })
@@ -55,7 +64,12 @@ fun AlgoNavigation(repository: StudyRepository) {
                 val id = requireNotNull(it.arguments?.getString("lesson"))
                 val lesson = Curriculum.lessons.find { lesson -> lesson.id == id }
                 if (lesson != null) {
-                    LearnScreen(lesson, { go("solve/$id/false") }, back, { go("reading/$id") })
+                    val backLabel = if (nav.previousBackStackEntry?.destination?.route == "home") {
+                        "Back to home"
+                    } else {
+                        "Back to lessons"
+                    }
+                    LearnScreen(lesson, { go("solve/$id/false") }, back, { go("reading/$id") }, backLabel = backLabel)
                 } else {
                     ImportedLessonScreen(id, back) { imported, prediction ->
                         LearnScreen(imported, { go("solve/$id/false") }, back, null, prediction)

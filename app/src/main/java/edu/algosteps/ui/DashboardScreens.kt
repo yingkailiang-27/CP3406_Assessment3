@@ -2,6 +2,10 @@ package edu.algosteps.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.*
@@ -14,6 +18,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import edu.algosteps.R
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -41,10 +47,12 @@ fun HomeScreen(
     onAlgorithms: () -> Unit,
     onCoding: () -> Unit,
     onStats: () -> Unit,
-    onSettings: () -> Unit
+    onSettings: () -> Unit,
+    onSearch: (String) -> Unit
 ) {
     val stats by viewModel.stats.collectAsStateWithLifecycle()
-    HomeContent(stats, onAlgorithms, onCoding, onStats, onSettings, importedLessonTitles().keys)
+    val importLesson = rememberLessonImport(onAlgorithms)
+    HomeContent(stats, onAlgorithms, onCoding, onStats, onSettings, importedLessonTitles().keys, onSearch, importLesson)
 }
 
 @Composable
@@ -54,10 +62,20 @@ internal fun HomeContent(
     onCoding: () -> Unit,
     onStats: () -> Unit,
     onSettings: () -> Unit,
-    importedIds: Set<String> = emptySet()
+    importedIds: Set<String> = emptySet(),
+    onSearch: (String) -> Unit = {},
+    onImport: (() -> Unit)? = null
 ) {
+    var search by rememberSaveable { mutableStateOf("") }
+    val focus = LocalFocusManager.current
+    val submitSearch = {
+        if (search.isNotBlank()) {
+            focus.clearFocus()
+            onSearch(search.trim())
+        }
+    }
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().imePadding(),
         contentPadding = PaddingValues(20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
@@ -65,31 +83,43 @@ internal fun HomeContent(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("AlgoSteps", Modifier.weight(1f).semantics { heading() },
                     style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
-                TextButton(onClick = onSettings) { Text("Settings") }
+                IconButton(onClick = onSettings) {
+                    Icon(painterResource(R.drawable.ic_settings), contentDescription = "Settings")
+                }
             }
         }
         item {
             Text(
-                text = "Trace an algorithm, then write and test your code.",
+                text = "Trace an algorithm, predict the next step, then practise writing code.",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold
             )
         }
         item {
-            BoxWithConstraints(Modifier.fillMaxWidth()) {
-                if (maxWidth >= 580.dp) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        TrackCard(false, onAlgorithms, Modifier.weight(1f))
-                        TrackCard(true, onCoding, Modifier.weight(1f))
-                    }
-                } else {
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        TrackCard(false, onAlgorithms, Modifier.fillMaxWidth())
-                        TrackCard(true, onCoding, Modifier.fillMaxWidth())
-                    }
+            OutlinedTextField(
+                value = search,
+                onValueChange = { search = it },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text("Search lessons") },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                keyboardActions = KeyboardActions(onSearch = { submitSearch() }),
+                trailingIcon = {
+                    TextButton(onClick = submitSearch, enabled = search.isNotBlank()) { Text("Search") }
+                }
+            )
+        }
+        item {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text("Course library", style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.semantics { heading() })
+                TrackCard(false, onAlgorithms, Modifier.fillMaxWidth())
+                if (onImport != null) {
+                    TextButton(onClick = onImport) { Text("Import a lesson file") }
                 }
             }
         }
+        item { TrackCard(true, onCoding, Modifier.fillMaxWidth()) }
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -136,7 +166,7 @@ private fun TrackCard(coding: Boolean, onClick: () -> Unit, modifier: Modifier) 
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
-                    if (coding) "Coding" else "Algorithms",
+                    if (coding) "Coding practice" else "Browse algorithms",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )

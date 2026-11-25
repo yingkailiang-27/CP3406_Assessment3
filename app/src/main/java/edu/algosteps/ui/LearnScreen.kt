@@ -14,6 +14,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -27,6 +29,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import edu.algosteps.R
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -47,13 +51,16 @@ internal fun LearnScreen(
     onPractice: (() -> Unit)?,
     onBack: () -> Unit,
     onReading: (() -> Unit)?,
-    importedPrediction: LessonPrediction? = null
+    importedPrediction: LessonPrediction? = null,
+    backLabel: String = "Back to lessons"
 ) {
     Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        TextButton(onClick = onBack) { Text("Back to lessons") }
+        IconButton(onClick = onBack) {
+            Icon(painterResource(R.drawable.ic_back), contentDescription = backLabel)
+        }
         Text(
             lesson.title,
             style = MaterialTheme.typography.headlineMedium,

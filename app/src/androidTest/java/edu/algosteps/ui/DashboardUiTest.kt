@@ -26,8 +26,8 @@ class DashboardUiTest {
                 HomeContent(DashboardStats(emptyList()), { opened += "learn" }, { opened += "code" }, {}, {})
             }
         }
-        compose.onNodeWithText("Algorithms").performScrollTo().performClick()
-        compose.onNodeWithText("Coding").performScrollTo().performClick()
+        compose.onNodeWithText("Browse algorithms").performScrollTo().performClick()
+        compose.onNodeWithText("Coding practice").performScrollTo().performClick()
         compose.runOnIdle { assertEquals(listOf("learn", "code"), opened) }
     }
 

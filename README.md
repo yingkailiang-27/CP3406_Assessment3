@@ -24,7 +24,7 @@ Use `./gradlew` on macOS and Linux. The second command needs a running emulator 
 
 ## Demonstrate the app
 
-1. **Trace and practise.** Open **Algorithms → Binary search**. In **Example 1**, step through the search for 16 in `[2, 4, 7, 11, 16, 23]` until it reaches index 4. Under **Predict the next step**, try **Search right**, read the hint, then choose **Search left** to see why the sorted order rules out the right half. Choose **Open coding exercise → Run samples** with the default starter. Example 1 reports `expected 4, got -1`. Choose **Review example 1 steps** to replay that input inside the results card. Close the trace and check that the editor still contains the draft.
+1. **Trace and practise.** Open **Browse algorithms → Binary search**. In **Example 1**, step through the search for 16 in `[2, 4, 7, 11, 16, 23]` until it reaches index 4. Under **Predict the next step**, try **Search right**, read the hint, then choose **Search left** to see why the sorted order rules out the right half. Choose **Open coding exercise → Run samples** with the default starter. Example 1 reports `expected 4, got -1`. Choose **Review example 1 steps** to replay that input inside the results card. Close the trace and check that the editor still contains the draft.
 2. **Save and reopen progress.** Choose **Submit solution**, then go to **View statistics** from home and find the new practice entry. Stop and relaunch the app to check that the entry persists. Choose **Open practice** on that entry to reopen the matching lesson and current practice draft. From the lesson-to-practice route, Android Back returns to the existing trace at its previous step.
 3. **Read online and offline.** In the lesson, read the disclosure above **Further reading**, then open it with an internet connection. Wait for **Reading updated from Wikipedia**. Disconnect the device and choose **Refresh article**. The page reports **Refresh unavailable. Showing your saved copy.** and keeps the dated excerpt visible. Reconnect after checking.
 4. **Check progress controls.** With disposable test data, choose **Settings → Clear progress → Cancel** and verify that the history remains. Repeat and choose **Delete progress**. Room removes saved submissions and drafts in a single transaction and retains settings and cached readings.
@@ -32,8 +32,8 @@ Use `./gradlew` on macOS and Linux. The second command needs a running emulator 
 ## Import a sample lesson
 
 1. Copy [maximum-subarray-lesson.json](examples/maximum-subarray-lesson.json) to the Android device or emulator so it is accessible in the file picker.
-2. Open **Algorithms → More → Import lessons**, select the JSON file, and confirm **Import lessons** in the preview.
-3. Search for `maximum`. Open **Maximum subarray sum** with **Study algorithm**, switch between its two examples, and try **Predict the next step**.
+2. Open **Home → Import a lesson file**, select the JSON file, and confirm **Import lessons** in the preview.
+3. From home, search for `maximum`. Tap the **Maximum subarray sum** course card, switch between its two examples, and try **Predict the next step**.
 4. Choose **Open coding exercise → Run samples**. With the starter code on a fresh draft, Example 1 should report `expected 8, got 4`. Select **Review example 1 steps** to replay the same input.
 5. Choose **Submit solution** to save a practice result. Restart the app, open **View statistics**, and choose **Open practice** on the saved entry. The imported lesson and its history remain on the device. Selecting the same package again displays a duplicate ID error.
 

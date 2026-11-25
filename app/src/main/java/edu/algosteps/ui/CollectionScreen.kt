@@ -17,6 +17,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import edu.algosteps.R
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -35,12 +37,22 @@ fun CollectionScreen(
     coding: Boolean,
     onBack: () -> Unit,
     onLearn: (String) -> Unit,
-    onSolve: (String, Boolean) -> Unit
+    onSolve: (String, Boolean) -> Unit,
+    initialQuery: String = ""
 ) {
-    var query by rememberSaveable { mutableStateOf("") }
-    var importMenuOpen by rememberSaveable { mutableStateOf(false) }
+    var query by rememberSaveable(initialQuery) { mutableStateOf(initialQuery) }
+    val context = LocalContext.current
     var imported by remember { mutableStateOf(emptyList<ImportedLesson>()) }
-    val openImport = if (!coding) rememberLessonImport { imported = it } else null
+    var libraryError by remember { mutableStateOf(false) }
+    LaunchedEffect(context, coding) {
+        if (!coding) {
+            try {
+                imported = withContext(Dispatchers.IO) { ImportedLessonStore(context).load() }
+            } catch (_: JSONException) {
+                libraryError = true
+            }
+        }
+    }
     val searchTerm = query.trim()
     val lessons = if (coding || searchTerm.isEmpty()) Curriculum.lessons else Curriculum.lessons.filter { lesson ->
         lesson.title.contains(searchTerm, ignoreCase = true) ||
@@ -57,81 +69,48 @@ fun CollectionScreen(
         ) {
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    TextButton(onClick = onBack) { Text("Back to home") }
                     Row(verticalAlignment = Alignment.CenterVertically) {
+                        IconButton(onClick = onBack) {
+                            Icon(painterResource(R.drawable.ic_back), contentDescription = "Back to home")
+                        }
                         Text(
                             if (coding) "Coding" else "Algorithms",
                             style = MaterialTheme.typography.headlineLarge,
                             modifier = Modifier.weight(1f).semantics { heading() }
                         )
-                        if (!coding) {
-                            Box {
-                                TextButton(onClick = { importMenuOpen = true }) { Text("More") }
-                                DropdownMenu(
-                                    expanded = importMenuOpen,
-                                    onDismissRequest = { importMenuOpen = false }
-                                ) {
-                                    DropdownMenuItem(
-                                        text = { Text("Import lessons") },
-                                        onClick = {
-                                            importMenuOpen = false
-                                            openImport?.invoke()
-                                        }
-                                    )
-                                }
-                            }
-                        }
                     }
-                    Text(if (coding) "Practice with a walkthrough, or take a single-problem exam independently."
-                         else "Choose an algorithm to trace it on two different inputs.",
-                        style = MaterialTheme.typography.bodyLarge)
-                    if (!coding) {
-                        OutlinedTextField(
-                            value = query,
-                            onValueChange = { query = it },
-                            modifier = Modifier.fillMaxWidth(),
-                            label = { Text("Search algorithms") },
-                            singleLine = true,
-                            trailingIcon = {
-                                if (query.isNotEmpty()) {
-                                    TextButton(onClick = { query = "" }) { Text("Clear") }
-                                }
-                            }
-                        )
+                    if (coding) {
+                        Text("Practice with a walkthrough, or take a single-problem exam independently.",
+                            style = MaterialTheme.typography.bodyLarge)
+                    } else if (searchTerm.isNotEmpty()) {
+                        Text("Results for “$searchTerm”", style = MaterialTheme.typography.titleMedium)
+                        TextButton(onClick = { query = "" }) { Text("Clear search") }
                     }
                 }
             }
+            if (libraryError) item { Text("Could not read the saved course library.") }
             if (lessons.isEmpty() && importedMatches.isEmpty()) item {
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text("No matching lessons", style = MaterialTheme.typography.titleMedium)
-                    TextButton(onClick = { query = "" }) { Text("Clear search") }
-                }
+                Text("No matching lessons", style = MaterialTheme.typography.titleMedium)
+            }
+            items(importedMatches.asReversed(), key = { it.id }) { lesson ->
+                AlgorithmRow(lesson.title, lesson.summary, "Imported lesson") { onLearn(lesson.id) }
             }
             items(lessons, key = { it.id }) { lesson ->
-                OutlinedCard(Modifier.fillMaxWidth()) {
-                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Text(lesson.difficulty, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
-                        Text(lesson.title, style = MaterialTheme.typography.titleLarge)
-                        Text(lesson.summary, style = MaterialTheme.typography.bodyMedium)
-                        if (coding) {
+                if (coding) {
+                    OutlinedCard(Modifier.fillMaxWidth()) {
+                        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Text(lesson.difficulty, style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.secondary)
+                            Text(lesson.title, style = MaterialTheme.typography.titleLarge)
+                            Text(lesson.summary, style = MaterialTheme.typography.bodyMedium)
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Button(onClick = { onSolve(lesson.id, false) }) { Text("Practice") }
                                 OutlinedButton(onClick = { onSolve(lesson.id, true) }) { Text("Exam") }
                             }
-                        } else {
-                            TextButton(onClick = { onLearn(lesson.id) }) { Text("Study algorithm") }
                         }
                     }
-                }
-            }
-            items(importedMatches, key = { it.id }) { lesson ->
-                OutlinedCard(Modifier.fillMaxWidth()) {
-                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Text("Imported lesson", style = MaterialTheme.typography.labelMedium)
-                        Text(lesson.title, style = MaterialTheme.typography.titleLarge)
-                        Text(lesson.summary, style = MaterialTheme.typography.bodyMedium)
-                        TextButton(onClick = { onLearn(lesson.id) }) { Text("Study algorithm") }
-                    }
+                } else {
+                    AlgorithmRow(lesson.title, lesson.summary, lesson.difficulty) { onLearn(lesson.id) }
                 }
             }
         }
@@ -139,7 +118,18 @@ fun CollectionScreen(
 }
 
 @Composable
-private fun rememberLessonImport(onLibraryChanged: (List<ImportedLesson>) -> Unit): () -> Unit {
+private fun AlgorithmRow(title: String, summary: String, label: String, onClick: () -> Unit) {
+    OutlinedCard(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+            Text(title, style = MaterialTheme.typography.titleMedium)
+            Text(summary, style = MaterialTheme.typography.bodyMedium)
+            Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
+        }
+    }
+}
+
+@Composable
+internal fun rememberLessonImport(onImported: () -> Unit): () -> Unit {
     val context = LocalContext.current
     val resolver = context.contentResolver
     val store = remember(context) { ImportedLessonStore(context) }
@@ -147,13 +137,6 @@ private fun rememberLessonImport(onLibraryChanged: (List<ImportedLesson>) -> Uni
     var pending by remember { mutableStateOf<List<ImportedLesson>?>(null) }
     var error by rememberSaveable { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(false) }
-    LaunchedEffect(store) {
-        try {
-            onLibraryChanged(withContext(Dispatchers.IO) { store.load() })
-        } catch (_: JSONException) {
-            error = "Could not read the saved course library."
-        }
-    }
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) {
             loading = true
@@ -205,8 +188,9 @@ private fun rememberLessonImport(onLibraryChanged: (List<ImportedLesson>) -> Uni
                         loading = true
                         scope.launch {
                             try {
-                                onLibraryChanged(withContext(Dispatchers.IO) { store.add(preview) })
+                                withContext(Dispatchers.IO) { store.add(preview) }
                                 close()
+                                onImported()
                             } catch (e: IllegalArgumentException) {
                                 error = e.message ?: "Could not save the course package."
                             } catch (_: IOException) {

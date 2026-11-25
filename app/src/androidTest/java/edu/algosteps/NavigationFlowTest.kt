@@ -21,6 +21,7 @@ import kotlinx.coroutines.runBlocking
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -34,8 +35,8 @@ class NavigationFlowTest {
 
     @Test
     fun lessonLeadsToMatchingPracticeAndBackRestoresTheLesson() {
-        app.onNodeWithText("Algorithms").performClick()
-        app.onAllNodesWithText("Study algorithm")[0].performClick()
+        app.onNodeWithText("Browse algorithms").performClick()
+        app.onNodeWithText("Linear search").performClick()
         app.onNodeWithText("Example 2").performScrollTo().performClick()
         app.onNodeWithText("Next step").performScrollTo().performClick()
         app.onNodeWithText("Open coding exercise").performScrollTo().performClick()
@@ -43,7 +44,7 @@ class NavigationFlowTest {
         app.onNodeWithText("Linear search").assertIsDisplayed()
         app.onNodeWithText("Back").performClick()
         app.onNodeWithText("Why it works").performScrollTo().assertIsDisplayed()
-        app.onNodeWithText("Back to lessons").performScrollTo().performClick()
+        app.onNodeWithContentDescription("Back to lessons").performScrollTo().performClick()
         app.onNodeWithText("Algorithms").assertIsDisplayed()
     }
 }
