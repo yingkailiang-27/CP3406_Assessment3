@@ -6,7 +6,23 @@ import org.json.JSONObject
 
 private const val MAX_PACKAGE_BYTES = 256 * 1024
 
-internal fun readLessonTitles(input: InputStream, existingIds: Set<String>): List<String> {
+internal data class ImportedLesson(
+    val id: String,
+    val title: String,
+    val summary: String,
+    val json: String
+) {
+    companion object {
+        fun fromJson(lesson: JSONObject) = ImportedLesson(
+            id = lesson.getString("id"),
+            title = lesson.getString("title").trim(),
+            summary = lesson.getString("summary").trim(),
+            json = lesson.toString()
+        )
+    }
+}
+
+internal fun readLessonPackage(input: InputStream, existingIds: Set<String>): List<ImportedLesson> {
     val bytes = ByteArray(MAX_PACKAGE_BYTES + 1)
     var size = 0
     while (size < bytes.size) {
@@ -32,7 +48,7 @@ internal fun readLessonTitles(input: InputStream, existingIds: Set<String>): Lis
         require(title.length in 1..120) { "Lesson ${index + 1} needs a title of 1 to 120 characters." }
         require(ids.add(id)) { "Duplicate lesson ID: $id." }
         validateLesson(lesson, "Lesson ${index + 1}")
-        title
+        ImportedLesson.fromJson(lesson)
     }
 }
 

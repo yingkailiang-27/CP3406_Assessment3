@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -20,7 +21,9 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import edu.algosteps.content.Curriculum
-import edu.algosteps.content.readLessonTitles
+import edu.algosteps.content.ImportedLesson
+import edu.algosteps.content.ImportedLessonStore
+import edu.algosteps.content.readLessonPackage
 import java.io.IOException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -36,11 +39,15 @@ fun CollectionScreen(
 ) {
     var query by rememberSaveable { mutableStateOf("") }
     var importMenuOpen by rememberSaveable { mutableStateOf(false) }
-    val openImport = if (!coding) rememberLessonImportPreview() else null
+    var imported by remember { mutableStateOf(emptyList<ImportedLesson>()) }
+    val openImport = if (!coding) rememberLessonImport { imported = it } else null
     val searchTerm = query.trim()
     val lessons = if (coding || searchTerm.isEmpty()) Curriculum.lessons else Curriculum.lessons.filter { lesson ->
         lesson.title.contains(searchTerm, ignoreCase = true) ||
             lesson.summary.contains(searchTerm, ignoreCase = true)
+    }
+    val importedMatches = imported.filter {
+        it.title.contains(searchTerm, ignoreCase = true) || it.summary.contains(searchTerm, ignoreCase = true)
     }
     Box(Modifier.fillMaxSize().imePadding(), contentAlignment = Alignment.TopCenter) {
         LazyColumn(
@@ -94,7 +101,7 @@ fun CollectionScreen(
                     }
                 }
             }
-            if (lessons.isEmpty()) item {
+            if (lessons.isEmpty() && importedMatches.isEmpty()) item {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text("No matching lessons", style = MaterialTheme.typography.titleMedium)
                     TextButton(onClick = { query = "" }) { Text("Clear search") }
@@ -117,28 +124,48 @@ fun CollectionScreen(
                     }
                 }
             }
+            items(importedMatches, key = { it.id }) { lesson ->
+                OutlinedCard(Modifier.fillMaxWidth()) {
+                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text("Imported lesson", style = MaterialTheme.typography.labelMedium)
+                        Text(lesson.title, style = MaterialTheme.typography.titleLarge)
+                        Text(lesson.summary, style = MaterialTheme.typography.bodyMedium)
+                        Text("Saved to your library. Opening imported lessons is not available yet.",
+                            style = MaterialTheme.typography.bodySmall)
+                    }
+                }
+            }
         }
     }
 }
 
-
 @Composable
-private fun rememberLessonImportPreview(): () -> Unit {
-    val resolver = LocalContext.current.contentResolver
+private fun rememberLessonImport(onLibraryChanged: (List<ImportedLesson>) -> Unit): () -> Unit {
+    val context = LocalContext.current
+    val resolver = context.contentResolver
+    val store = remember(context) { ImportedLessonStore(context) }
     val scope = rememberCoroutineScope()
-    var titles by rememberSaveable { mutableStateOf<ArrayList<String>?>(null) }
+    var pending by remember { mutableStateOf<List<ImportedLesson>?>(null) }
     var error by rememberSaveable { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(false) }
+    LaunchedEffect(store) {
+        try {
+            onLibraryChanged(withContext(Dispatchers.IO) { store.load() })
+        } catch (_: JSONException) {
+            error = "Could not read the saved course library."
+        }
+    }
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) {
             loading = true
             scope.launch {
                 try {
-                    titles = ArrayList(withContext(Dispatchers.IO) {
+                    pending = withContext(Dispatchers.IO) {
                         val ids = Curriculum.lessons.mapTo(mutableSetOf()) { it.id }
-                        resolver.openInputStream(uri)?.use { readLessonTitles(it, ids) }
+                        store.load().forEach { ids.add(it.id) }
+                        resolver.openInputStream(uri)?.use { readLessonPackage(it, ids) }
                             ?: throw IOException("Unable to open course package.")
-                    })
+                    }
                 } catch (e: IllegalArgumentException) {
                     error = e.message ?: "Invalid course package."
                 } catch (_: JSONException) {
@@ -153,27 +180,53 @@ private fun rememberLessonImportPreview(): () -> Unit {
             }
         }
     }
-    val preview = titles
+    val preview = pending
     if (loading || preview != null || error != null) {
-        val close = { titles = null; error = null }
+        val close = { pending = null; error = null }
         AlertDialog(
             onDismissRequest = { if (!loading) close() },
-            title = { Text(if (error == null) "Lesson preview" else "Unable to preview lessons") },
+            title = { Text(if (error == null) "Lesson preview" else "Unable to import lessons") },
             text = {
                 when {
-                    loading -> Text("Reading course package…")
+                    loading -> Text(if (preview == null) "Reading course package…" else "Saving lessons…")
+                    error != null -> Text(error.orEmpty())
                     preview != null -> LazyColumn(
                         modifier = Modifier.heightIn(max = 240.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        items(preview) { title -> Text(title) }
-                        item { Text("Preview only. No lessons have been added.") }
+                        items(preview) { lesson -> Text(lesson.title) }
+                        item { Text("Confirm to save these lessons on this device.") }
                     }
                     else -> Text(error.orEmpty())
                 }
             },
             confirmButton = {
-                if (!loading) TextButton(onClick = close) { Text("Close") }
+                if (!loading && preview != null && error == null) {
+                    Button(onClick = {
+                        loading = true
+                        scope.launch {
+                            try {
+                                onLibraryChanged(withContext(Dispatchers.IO) { store.add(preview) })
+                                close()
+                            } catch (e: IllegalArgumentException) {
+                                error = e.message ?: "Could not save the course package."
+                            } catch (_: IOException) {
+                                error = "Could not save the course package. Try again."
+                            } catch (_: JSONException) {
+                                error = "Could not read the saved course library."
+                            } finally {
+                                loading = false
+                            }
+                        }
+                    }) { Text("Import lessons") }
+                } else if (!loading) {
+                    TextButton(onClick = close) { Text("Close") }
+                }
+            },
+            dismissButton = {
+                if (!loading && preview != null && error == null) {
+                    TextButton(onClick = close) { Text("Cancel") }
+                }
             }
         )
     }
