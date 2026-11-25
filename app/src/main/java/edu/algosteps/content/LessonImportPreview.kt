@@ -88,6 +88,10 @@ private fun validateLesson(lesson: JSONObject, path: String) {
                 ?: throw IllegalArgumentException("$casePath must be an object.")
             validateCase(case, casePath, hasTrace = field == "samples")
         }
+        if (field == "samples") {
+            val inputs = cases.objects().map { it.toCase() }.map { it.nums to it.target }
+            require(inputs.distinct().size == inputs.size) { "$path.samples must use different inputs." }
+        }
     }
 }
 
@@ -125,3 +129,62 @@ private fun JSONObject.requiredArray(field: String, path: String, size: IntRange
     require(array.length() in size) { "$path.$field must contain ${size.first} to ${size.last} entries." }
     return array
 }
+
+internal data class LessonPrediction(
+    val prompt: String,
+    val correctOption: String,
+    val incorrectOption: String,
+    val explanation: String,
+    val hint: String
+)
+
+internal fun ImportedLesson.toStudyLesson(): Pair<Lesson, LessonPrediction> {
+    val data = JSONObject(json)
+    val examples = data.getJSONArray("samples").objects()
+    val samples = examples.map { it.toCase() }
+    val traces = examples.map { example ->
+        example.getJSONArray("trace").objects().map { step ->
+            TraceStep(
+                title = step.getString("title"),
+                detail = step.getString("detail"),
+                active = step.getJSONArray("active").integers().toSet()
+            )
+        }
+    }
+    val notes = data.getJSONArray("notes")
+    val lesson = Lesson(
+        id = id,
+        title = title,
+        summary = summary,
+        difficulty = data.getString("difficulty"),
+        prompt = data.getString("prompt"),
+        starter = data.getString("starter"),
+        reference = data.getString("reference"),
+        notes = List(notes.length()) { notes.getString(it) },
+        samples = samples,
+        checks = data.getJSONArray("checks").objects().map { it.toCase() },
+        idea = data.getString("idea"),
+        invariant = data.getString("invariant"),
+        complexity = data.getString("complexity"),
+        targetLabel = (data.opt("targetLabel") as? String).orEmpty().trim(),
+        trace = { example -> traces[samples.indexOfFirst { it === example }.takeIf { it >= 0 } ?: samples.indexOf(example)] }
+    )
+    val prediction = data.getJSONObject("prediction")
+    return lesson to LessonPrediction(
+        prompt = prediction.getString("prompt"),
+        correctOption = prediction.getString("correctOption"),
+        incorrectOption = prediction.getString("incorrectOption"),
+        explanation = prediction.getString("explanation"),
+        hint = prediction.getString("hint")
+    )
+}
+
+private fun JSONArray.objects() = List(length()) { getJSONObject(it) }
+
+private fun JSONArray.integers() = List(length()) { getInt(it) }
+
+private fun JSONObject.toCase() = Case(
+    nums = getJSONArray("nums").integers(),
+    target = getInt("target"),
+    expected = getInt("expected")
+)

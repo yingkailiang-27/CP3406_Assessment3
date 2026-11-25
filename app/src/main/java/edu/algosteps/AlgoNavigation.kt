@@ -1,7 +1,14 @@
 package edu.algosteps
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.produceState
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,9 +19,16 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import edu.algosteps.content.Curriculum
+import edu.algosteps.content.ImportedLessonStore
+import edu.algosteps.content.Lesson
+import edu.algosteps.content.LessonPrediction
+import edu.algosteps.content.toStudyLesson
 import edu.algosteps.data.StudyRepository
 import edu.algosteps.data.SubmissionMode
 import edu.algosteps.ui.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.json.JSONException
 
 @Composable
 fun AlgoNavigation(repository: StudyRepository) {
@@ -36,8 +50,13 @@ fun AlgoNavigation(repository: StudyRepository) {
                 CollectionScreen(true, back, { _ -> }, { id, exam -> go("solve/$id/$exam") })
             }
             composable("learn/{lesson}", arguments = lessonArgument) {
-                val lesson = Curriculum.byId(requireNotNull(it.arguments?.getString("lesson")))
-                LearnScreen(lesson, { go("solve/${lesson.id}/false") }, back, { go("reading/${lesson.id}") })
+                val id = requireNotNull(it.arguments?.getString("lesson"))
+                val lesson = Curriculum.lessons.find { lesson -> lesson.id == id }
+                if (lesson != null) {
+                    LearnScreen(lesson, { go("solve/$id/false") }, back, { go("reading/$id") })
+                } else {
+                    ImportedStudyScreen(id, back)
+                }
             }
             composable("reading/{lesson}", arguments = lessonArgument) {
                 val id = requireNotNull(it.arguments?.getString("lesson"))
@@ -54,6 +73,29 @@ fun AlgoNavigation(repository: StudyRepository) {
                 StatsScreen(dashboard, back) { id, mode -> go("solve/$id/${mode == SubmissionMode.EXAM}") }
             }
             composable("settings") { SettingsScreen(dashboard, back) }
+        }
+    }
+}
+
+@Composable
+private fun ImportedStudyScreen(id: String, onBack: () -> Unit) {
+    val context = LocalContext.current
+    val result = produceState<Result<Pair<Lesson, LessonPrediction>?>?>(null, id, context) {
+        value = try {
+            Result.success(withContext(Dispatchers.IO) {
+                ImportedLessonStore(context).load().find { it.id == id }?.toStudyLesson()
+            })
+        } catch (error: JSONException) {
+            Result.failure(error)
+        }
+    }.value
+    val imported = result?.getOrNull()
+    if (imported != null) {
+        LearnScreen(imported.first, null, onBack, null, imported.second)
+    } else {
+        Column(Modifier.padding(20.dp)) {
+            TextButton(onClick = onBack) { Text("Back to lessons") }
+            Text(if (result == null) "Loading lesson…" else "This imported lesson is unavailable.")
         }
     }
 }

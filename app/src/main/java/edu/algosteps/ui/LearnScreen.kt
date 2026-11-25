@@ -39,9 +39,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import edu.algosteps.content.Lesson
+import edu.algosteps.content.LessonPrediction
 
 @Composable
-fun LearnScreen(lesson: Lesson, onPractice: () -> Unit, onBack: () -> Unit, onReading: () -> Unit) {
+internal fun LearnScreen(
+    lesson: Lesson,
+    onPractice: (() -> Unit)?,
+    onBack: () -> Unit,
+    onReading: (() -> Unit)?,
+    importedPrediction: LessonPrediction? = null
+) {
     Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
@@ -55,6 +62,15 @@ fun LearnScreen(lesson: Lesson, onPractice: () -> Unit, onBack: () -> Unit, onRe
         )
         Text(lesson.idea, style = MaterialTheme.typography.bodyLarge)
         Walkthrough(lesson)
+        if (importedPrediction != null) {
+            PredictionQuestion(
+                prompt = importedPrediction.prompt,
+                correctOption = importedPrediction.correctOption,
+                incorrectOption = importedPrediction.incorrectOption,
+                explanation = importedPrediction.explanation,
+                hint = importedPrediction.hint
+            )
+        }
         when (lesson.id) {
             "linear-search" -> PredictionQuestion(
                 prompt = "Search [4, 7, 2, 7] from left to right for the first 7. " +
@@ -90,14 +106,18 @@ fun LearnScreen(lesson: Lesson, onPractice: () -> Unit, onBack: () -> Unit, onRe
                 hint = "Try again. Which number leaves the window when it moves one place to the right?"
             )
         }
-        Button(onClick = onPractice, modifier = Modifier.fillMaxWidth()) { Text("Open coding exercise") }
+        if (onPractice != null) {
+            Button(onClick = onPractice, modifier = Modifier.fillMaxWidth()) { Text("Open coding exercise") }
+        }
         LessonText("Why it works", lesson.invariant)
         LessonText("Time and space", lesson.complexity)
-        Text(
-            text = "Further reading requests a public article from Wikipedia. Your code drafts and scores stay on this device.",
-            style = MaterialTheme.typography.bodyMedium
-        )
-        OutlinedButton(onClick = onReading, modifier = Modifier.fillMaxWidth()) { Text("Further reading") }
+        if (onReading != null) {
+            Text(
+                text = "Further reading requests a public article from Wikipedia. Your code drafts and scores stay on this device.",
+                style = MaterialTheme.typography.bodyMedium
+            )
+            OutlinedButton(onClick = onReading, modifier = Modifier.fillMaxWidth()) { Text("Further reading") }
+        }
         Spacer(Modifier.height(8.dp))
     }
 }
@@ -190,17 +210,19 @@ internal fun Walkthrough(lesson: Lesson, sampleIndex: Int? = null) {
                     }
                 }
             }
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                color = colors.surface,
-                shape = MaterialTheme.shapes.medium
-            ) {
-                Text(
-                    "${lesson.targetLabel} = ${input.target}",
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
+            if (lesson.targetLabel.isNotBlank()) {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = colors.surface,
+                    shape = MaterialTheme.shapes.medium
+                ) {
+                    Text(
+                        "${lesson.targetLabel} = ${input.target}",
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
             Row(
                 modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),

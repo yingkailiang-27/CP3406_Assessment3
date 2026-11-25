@@ -130,8 +130,7 @@ fun CollectionScreen(
                         Text("Imported lesson", style = MaterialTheme.typography.labelMedium)
                         Text(lesson.title, style = MaterialTheme.typography.titleLarge)
                         Text(lesson.summary, style = MaterialTheme.typography.bodyMedium)
-                        Text("Saved to your library. Opening imported lessons is not available yet.",
-                            style = MaterialTheme.typography.bodySmall)
+                        TextButton(onClick = { onLearn(lesson.id) }) { Text("Study algorithm") }
                     }
                 }
             }
