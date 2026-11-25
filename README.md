@@ -2,7 +2,7 @@
 
 **AlgoSteps is an Android learning app that helps first-year computing students practise search and array algorithms by tracing examples and writing Python code.**
 
-1. **Algorithms** shows how an algorithm processes an example, one step at a time. Each of the four lessons ends its walkthrough with **Predict the next step**. Students make a choice on a new input, get a hint if needed and can retry before moving on to code.
+1. **Algorithms** shows how an algorithm processes an example, one step at a time. Each of the four built-in lessons ends its walkthrough with **Predict the next step**. Students make a choice on a new input, get a hint if needed and can retry before moving on to code.
 2. **Coding** lets students write and run a solution on the same inputs. When a practice sample fails, they can compare the expected and actual results and replay that exact example beside the feedback.
 3. **View statistics** shows saved results and lets students reopen an exercise with its draft. **Settings** lets them adjust hints and clear their learning progress.
 
@@ -29,6 +29,16 @@ Use `./gradlew` on macOS and Linux. The second command needs a running emulator 
 3. **Read online and offline.** In the lesson, read the disclosure above **Further reading**, then open it with an internet connection. Wait for **Reading updated from Wikipedia**. Disconnect the device and choose **Refresh article**. The page reports **Refresh unavailable. Showing your saved copy.** and keeps the dated excerpt visible. Reconnect after checking.
 4. **Check progress controls.** With disposable test data, choose **Settings → Clear progress → Cancel** and verify that the history remains. Repeat and choose **Delete progress**. Room removes saved submissions and drafts in a single transaction and retains settings and cached readings.
 
+## Import a sample lesson
+
+1. Copy [maximum-subarray-lesson.json](examples/maximum-subarray-lesson.json) to the Android device or emulator so it is accessible in the file picker.
+2. Open **Algorithms → More → Import lessons**, select the JSON file, and confirm **Import lessons** in the preview.
+3. Search for `maximum`. Open **Maximum subarray sum** with **Study algorithm**, switch between its two examples, and try **Predict the next step**.
+4. Choose **Open coding exercise → Run samples**. With the starter code on a fresh draft, Example 1 should report `expected 8, got 4`. Select **Review example 1 steps** to replay the same input.
+5. Choose **Submit solution** to save a practice result. Restart the app, open **View statistics**, and choose **Open practice** on the saved entry. The imported lesson and its history remain on the device. Selecting the same package again displays a duplicate ID error.
+
+The preview checks the package structure. Before opening an imported exercise, the app runs the provided reference solution against its example and grading cases. Imported lessons support study and practice through **Algorithms**. The built-in lessons also offer exam mode and Wikipedia reading.
+
 ## Two study paths
 
 | Lesson | Algorithm activity | Prediction | Coding objective |
@@ -40,9 +50,9 @@ Use `./gradlew` on macOS and Linux. The second command needs a running emulator 
 
 **Algorithms.** Step forward or back through two worked inputs. Each step names the active index or window and explains the decision. A prediction question, a correctness explanation, and a time and space analysis follow the walkthrough.
 
-**Coding.** Practice offers an editable starter, a topic-specific hint and a numbered worked solution with explanations. A single-problem exam keeps the worked solution behind the first recorded submission. Practice and exam drafts are separate. **Run samples** evaluates two public cases. **Submit solution** grades those cases plus six additional checks and saves the result. A sample run never changes statistics. The acceptance rate is the fraction of saved submissions that passed every check. The solved-problem count uses each distinct lesson that has ever passed.
+**Coding.** Practice offers an editable starter, a topic-specific hint and a numbered worked solution with explanations. A single-problem exam keeps the worked solution behind the first recorded submission. Practice and exam drafts are separate. **Run samples** evaluates two public cases. **Submit solution** grades those cases plus the lesson’s additional checks and saves the result. A sample run never changes statistics. The acceptance rate is the fraction of saved submissions that passed every check. The solved-problem count uses each distinct lesson that has ever passed.
 
-The editor runs a small, bounded Python teaching subset on the device. Implement `def solve(nums, target):` and return one integer. It supports integer variables, comparisons, indexed reads, `len(nums)`, conditionals, loops and integer arithmetic. It accepts neither imports nor arbitrary packages. Source length, integer range and execution steps are bounded. A passing outcome means the implementation passed the test cases; the judge does not measure asymptotic complexity. The exam is for individual self-assessment on a personal device. The four exercises and assessment cases are bundled in the source.
+The editor runs a small, bounded Python teaching subset on the device. Implement `def solve(nums, target):` and return one integer. It supports integer variables, comparisons, indexed reads, `len(nums)`, conditionals, loops and integer arithmetic. It accepts neither imports nor arbitrary packages. Source length, integer range and execution steps are bounded. A passing outcome means the implementation passed the test cases; the judge does not measure asymptotic complexity. The exam is for individual self-assessment on a personal device. The four built-in exercises and their assessment cases are bundled in the source.
 
 ## Android architecture
 

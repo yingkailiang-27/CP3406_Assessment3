@@ -1,0 +1,160 @@
+{
+  "schemaVersion": 1,
+  "lessons": [
+    {
+      "id": "maximum-subarray",
+      "title": "Maximum subarray sum",
+      "difficulty": "Medium",
+      "summary": "Decide when to extend a contiguous segment and when to start again.",
+      "idea": "At each index, compare extending the previous segment with starting at the current value.",
+      "invariant": "After processing an index, ending is the largest sum of any segment ending there. best is the largest sum seen so far.",
+      "complexity": "O(n) time and O(1) extra space.",
+      "inputLabel": "List",
+      "targetLabel": null,
+      "prompt": "Return the largest sum of any non-empty contiguous segment in nums. nums is non-empty and may contain negative values. Ignore target.",
+      "starter": "def solve(nums, target):\n    # Track the best segment ending at each index.\n    return nums[0]",
+      "reference": "def solve(nums, target):\n    ending = nums[0]\n    best = ending\n    for i in range(1, len(nums)):\n        extended = ending + nums[i]\n        if extended > nums[i]:\n            ending = extended\n        else:\n            ending = nums[i]\n        if ending > best:\n            best = ending\n    return best",
+      "notes": [
+        "Start with the first value so an all-negative list returns a negative sum.",
+        "Compare ending + nums[i] with nums[i] before updating ending.",
+        "Track the best sum separately so a later drop does not erase it."
+      ],
+      "samples": [
+        {
+          "nums": [
+            4,
+            -6,
+            3,
+            5
+          ],
+          "target": 0,
+          "expected": 8,
+          "trace": [
+            {
+              "title": "Start at index 0",
+              "detail": "The segment [4] has sum 4. The best sum so far is 4.",
+              "active": [
+                0
+              ]
+            },
+            {
+              "title": "Extend at index 1",
+              "detail": "Extending gives −2, compared with −6 if you restart. The best sum so far stays at 4.",
+              "active": [
+                0,
+                1
+              ]
+            },
+            {
+              "title": "Restart at index 2",
+              "detail": "Starting at 3 beats extending to a sum of 1. The best sum so far stays at 4.",
+              "active": [
+                2
+              ]
+            },
+            {
+              "title": "Extend at index 3",
+              "detail": "Extending [3] with 5 gives 8. The best segment is [3, 5].",
+              "active": [
+                2,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "nums": [
+            -5,
+            -2,
+            -4
+          ],
+          "target": 0,
+          "expected": -2,
+          "trace": [
+            {
+              "title": "Start at index 0",
+              "detail": "The segment [−5] has sum −5.",
+              "active": [
+                0
+              ]
+            },
+            {
+              "title": "Restart at index 1",
+              "detail": "Starting at −2 beats extending to −7. The best sum so far becomes −2.",
+              "active": [
+                1
+              ]
+            },
+            {
+              "title": "Restart at index 2",
+              "detail": "Starting at −4 beats extending to −6. The best sum so far stays at −2.",
+              "active": [
+                2
+              ]
+            }
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "nums": [
+            7
+          ],
+          "target": 0,
+          "expected": 7
+        },
+        {
+          "nums": [
+            -9
+          ],
+          "target": 0,
+          "expected": -9
+        },
+        {
+          "nums": [
+            1,
+            2,
+            3
+          ],
+          "target": 0,
+          "expected": 6
+        },
+        {
+          "nums": [
+            5,
+            -1,
+            4
+          ],
+          "target": 0,
+          "expected": 8
+        },
+        {
+          "nums": [
+            -2,
+            0,
+            -1
+          ],
+          "target": 0,
+          "expected": 0
+        },
+        {
+          "nums": [
+            6,
+            -9,
+            2,
+            1
+          ],
+          "target": 0,
+          "expected": 6
+        }
+      ],
+      "prediction": {
+        "prompt": "For [2, −5, 4, 1], the best sum ending just before 4 is −3. What should you do when you reach 4?",
+        "correctOption": "Start a new segment at 4",
+        "incorrectOption": "Extend the previous segment",
+        "explanation": "Starting at 4 gives 4. Extending the previous segment gives −3 + 4 = 1.",
+        "hint": "Compare the sum of starting at 4 with the sum of adding 4 to −3."
+      }
+    }
+  ]
+}
