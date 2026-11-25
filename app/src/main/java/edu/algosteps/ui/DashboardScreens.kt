@@ -13,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -24,11 +25,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import edu.algosteps.content.Curriculum
+import edu.algosteps.content.ImportedLessonStore
 import edu.algosteps.data.SubmissionMode
 import java.text.DateFormat
 import java.util.Date
 import java.util.Locale
 import kotlin.math.roundToInt
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.json.JSONException
 
 @Composable
 fun HomeScreen(
@@ -39,7 +44,7 @@ fun HomeScreen(
     onSettings: () -> Unit
 ) {
     val stats by viewModel.stats.collectAsStateWithLifecycle()
-    HomeContent(stats, onAlgorithms, onCoding, onStats, onSettings)
+    HomeContent(stats, onAlgorithms, onCoding, onStats, onSettings, importedLessonTitles().keys)
 }
 
 @Composable
@@ -48,7 +53,8 @@ internal fun HomeContent(
     onAlgorithms: () -> Unit,
     onCoding: () -> Unit,
     onStats: () -> Unit,
-    onSettings: () -> Unit
+    onSettings: () -> Unit,
+    importedIds: Set<String> = emptySet()
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -95,9 +101,10 @@ internal fun HomeContent(
                     if (stats == null) {
                         Text("Loading progress…")
                     } else {
-                        val solved = Curriculum.lessons.count { it.id in stats.solvedTopics }
-                        Text("$solved of ${Curriculum.lessons.size} problems solved")
-                        LinearProgressIndicator(progress = { solved.toFloat() / Curriculum.lessons.size.coerceAtLeast(1) },
+                        val lessonIds = Curriculum.lessons.map { it.id } + importedIds
+                        val solved = lessonIds.count { it in stats.solvedTopics }
+                        Text("$solved of ${lessonIds.size} problems solved")
+                        LinearProgressIndicator(progress = { solved.toFloat() / lessonIds.size.coerceAtLeast(1) },
                             modifier = Modifier.fillMaxWidth())
                     }
                     TextButton(onClick = onStats) { Text("View statistics") }
@@ -166,12 +173,32 @@ private fun TrackMark(coding: Boolean, ink: Color) {
 @Composable
 fun StatsScreen(viewModel: DashboardViewModel, onBack: () -> Unit, onRetry: (String, SubmissionMode) -> Unit) {
     val stats by viewModel.stats.collectAsStateWithLifecycle()
-    StatsContent(stats, onBack, onRetry)
+    StatsContent(stats, onBack, onRetry, importedLessonTitles())
 }
 
 @Composable
-internal fun StatsContent(stats: DashboardStats?, onBack: () -> Unit, onRetry: (String, SubmissionMode) -> Unit) {
-    val curriculum = remember { Curriculum.lessons.associateBy { it.id } }
+private fun importedLessonTitles(): Map<String, String> {
+    val context = LocalContext.current
+    val importedTitles by produceState(emptyMap<String, String>(), context) {
+        value = try {
+            withContext(Dispatchers.IO) { ImportedLessonStore(context).load().associate { it.id to it.title } }
+        } catch (_: JSONException) {
+            emptyMap()
+        }
+    }
+    return importedTitles
+}
+
+@Composable
+internal fun StatsContent(
+    stats: DashboardStats?,
+    onBack: () -> Unit,
+    onRetry: (String, SubmissionMode) -> Unit,
+    importedTitles: Map<String, String> = emptyMap()
+) {
+    val curriculum = remember(importedTitles) {
+        Curriculum.lessons.associate { it.id to it.title } + importedTitles
+    }
     val dateFormat = remember(Locale.getDefault()) {
         DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)
     }
@@ -183,7 +210,7 @@ internal fun StatsContent(stats: DashboardStats?, onBack: () -> Unit, onRetry: (
     ) {
         item { PageTitle("Statistics", onBack) }
         if (stats != null) item {
-            val total = Curriculum.lessons.size
+            val total = curriculum.size
             val solved = curriculum.keys.count { it in stats.solvedTopics }
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -245,10 +272,10 @@ internal fun StatsContent(stats: DashboardStats?, onBack: () -> Unit, onRetry: (
             val visible = if (onlyMisses) modeStats.submissions.filterNot { it.accepted } else modeStats.submissions
             if (visible.isEmpty()) item { Text(if (modeStats.submissions.isEmpty()) "No submissions for this mode." else "Every submission passed.") }
             items(visible) { attempt ->
-                val lesson = curriculum[attempt.lessonId]
+                val lessonTitle = curriculum[attempt.lessonId]
                 OutlinedCard(Modifier.fillMaxWidth()) {
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                        Text(lesson?.title ?: attempt.lessonId, style = MaterialTheme.typography.titleMedium)
+                        Text(lessonTitle ?: attempt.lessonId, style = MaterialTheme.typography.titleMedium)
                         Text(attempt.mode.label, style = MaterialTheme.typography.labelMedium)
                         val colors = MaterialTheme.colorScheme
                         Surface(
@@ -264,10 +291,10 @@ internal fun StatsContent(stats: DashboardStats?, onBack: () -> Unit, onRetry: (
                         }
                         Text("${attempt.passed}/${attempt.total} tests passed · ${dateFormat.format(Date(attempt.submittedAt))}",
                             style = MaterialTheme.typography.bodySmall)
-                        if (lesson != null) {
+                        if (lessonTitle != null) {
                             val action = if (attempt.mode == SubmissionMode.EXAM) "Open exam" else "Open practice"
                             OutlinedButton(
-                                onClick = { onRetry(lesson.id, attempt.mode) },
+                                onClick = { onRetry(attempt.lessonId, attempt.mode) },
                                 modifier = Modifier.fillMaxWidth()
                             ) { Text(action) }
                         }
