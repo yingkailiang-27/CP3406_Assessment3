@@ -24,6 +24,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import edu.algosteps.R
 import androidx.compose.ui.semantics.heading
@@ -68,44 +69,28 @@ fun CollectionScreen(
     val importedMatches = imported.filter {
         it.title.contains(searchTerm, ignoreCase = true) || it.summary.contains(searchTerm, ignoreCase = true)
     }
-    val paper = if (!coding && !isSystemInDarkTheme()) Color(0xFFFAF6EC)
+    val paper = if (!isSystemInDarkTheme()) Color(0xFFFAF6EC)
         else MaterialTheme.colorScheme.background
     Column(Modifier.fillMaxSize().background(paper).imePadding(),
         horizontalAlignment = Alignment.CenterHorizontally) {
-        if (!coding) {
-            Surface(color = Color(0xFF173C2B), contentColor = Color.White) {
-                Row(
-                    Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = onBack) {
-                        Icon(painterResource(R.drawable.ic_back), contentDescription = "Back to home")
-                    }
-                    Text("Algorithms", Modifier.weight(1f).semantics { heading() },
-                        style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+        Surface(color = Color(0xFF173C2B), contentColor = Color.White) {
+            Row(
+                Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = onBack) {
+                    Icon(painterResource(R.drawable.ic_back), contentDescription = "Back to home")
                 }
+                Text(if (coding) "Coding practice" else "Algorithms", Modifier.weight(1f).semantics { heading() },
+                    style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
             }
         }
         LazyColumn(
             modifier = Modifier.weight(1f).widthIn(max = 720.dp).fillMaxWidth(),
-            contentPadding = PaddingValues(horizontal = 20.dp, vertical = if (coding) 12.dp else 20.dp),
-            verticalArrangement = Arrangement.spacedBy(if (coding) 12.dp else 16.dp)
+            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            if (coding) {
-                item {
-                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            IconButton(onClick = onBack) {
-                                Icon(painterResource(R.drawable.ic_back), contentDescription = "Back to home")
-                            }
-                            Text("Coding", Modifier.weight(1f).semantics { heading() },
-                                style = MaterialTheme.typography.headlineLarge)
-                        }
-                        Text("Practice with a walkthrough, or take a single-problem exam independently.",
-                            style = MaterialTheme.typography.bodyLarge)
-                    }
-                }
-            } else if (searchTerm.isNotEmpty()) {
+            if (!coding && searchTerm.isNotEmpty()) {
                 item {
                     Text("Results for “$searchTerm”", style = MaterialTheme.typography.titleMedium)
                     TextButton(onClick = { query = "" }) { Text("Clear search") }
@@ -120,18 +105,11 @@ fun CollectionScreen(
             }
             items(lessons, key = { it.id }) { lesson ->
                 if (coding) {
-                    OutlinedCard(Modifier.fillMaxWidth()) {
-                        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                            Text(lesson.difficulty, style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.secondary)
-                            Text(lesson.title, style = MaterialTheme.typography.titleLarge)
-                            Text(lesson.summary, style = MaterialTheme.typography.bodyMedium)
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Button(onClick = { onSolve(lesson.id, false) }) { Text("Practice") }
-                                OutlinedButton(onClick = { onSolve(lesson.id, true) }) { Text("Exam") }
-                            }
-                        }
-                    }
+                    PracticeCard(
+                        lesson.title, lesson.summary, lesson.difficulty,
+                        onPractice = { onSolve(lesson.id, false) },
+                        onExam = { onSolve(lesson.id, true) }
+                    )
                 } else {
                     AlgorithmRow(lesson.title, lesson.summary, lesson.difficulty) { onLearn(lesson.id) }
                 }
@@ -159,21 +137,84 @@ private fun AlgorithmRow(title: String, summary: String, label: String, onClick:
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Surface(
-                    shape = RoundedCornerShape(50),
-                    color = if (dark) colors.secondaryContainer else Color(0xFFCBDDB9),
-                    contentColor = if (dark) colors.onSecondaryContainer else Color(0xFF173C2B)
-                ) {
-                    Text(label, Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-                        style = MaterialTheme.typography.labelMedium)
-                }
-                Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                Text(summary, style = MaterialTheme.typography.bodyMedium)
+                LessonCardDetails(title, summary, label)
             }
             Icon(painterResource(R.drawable.ic_back), contentDescription = null,
                 modifier = Modifier.size(18.dp).rotate(180f))
         }
     }
+}
+
+@Composable
+private fun PracticeCard(
+    title: String,
+    summary: String,
+    label: String,
+    onPractice: () -> Unit,
+    onExam: () -> Unit
+) {
+    val dark = isSystemInDarkTheme()
+    val colors = MaterialTheme.colorScheme
+    val accent = if (dark) colors.primary else Color(0xFF173C2B)
+    val shape = RoundedCornerShape(10.dp)
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (dark) colors.surfaceVariant else Color(0xFFE5ECD9)
+        )
+    ) {
+        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            LessonCardDetails(title, summary, label)
+            Spacer(Modifier.height(4.dp))
+            val fontScale = LocalDensity.current.fontScale
+            BoxWithConstraints(Modifier.fillMaxWidth()) {
+                val actions: @Composable (Modifier) -> Unit = { modifier ->
+                    Button(
+                        onClick = onPractice,
+                        modifier = modifier.heightIn(min = 48.dp),
+                        shape = shape,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = accent,
+                            contentColor = if (dark) colors.onPrimary else Color.White
+                        )
+                    ) { Text("Practice") }
+                    OutlinedButton(
+                        onClick = onExam,
+                        modifier = modifier.heightIn(min = 48.dp),
+                        shape = shape,
+                        border = BorderStroke(1.dp, accent),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = accent)
+                    ) { Text("Exam") }
+                }
+                if (maxWidth < 240.dp || fontScale >= 1.5f) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        actions(Modifier.fillMaxWidth())
+                    }
+                } else {
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        actions(Modifier.weight(1f))
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun LessonCardDetails(title: String, summary: String, label: String) {
+    val dark = isSystemInDarkTheme()
+    val colors = MaterialTheme.colorScheme
+    Surface(
+        shape = RoundedCornerShape(50),
+        color = if (dark) colors.secondaryContainer else Color(0xFFCBDDB9),
+        contentColor = if (dark) colors.onSecondaryContainer else Color(0xFF173C2B)
+    ) {
+        Text(label, Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+            style = MaterialTheme.typography.labelMedium)
+    }
+    Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+    Text(summary, style = MaterialTheme.typography.bodyMedium)
 }
 
 @Composable
