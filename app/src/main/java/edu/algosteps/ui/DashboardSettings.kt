@@ -94,11 +94,13 @@ fun SettingsScreen(viewModel: DashboardViewModel, onBack: () -> Unit) {
         }
     }
     val showDeviceLink = !allowed && (attempted || prefs?.reminders == true)
-    Scaffold(snackbarHost = { SnackbarHost(snackbar) }) { inset ->
+    Scaffold(
+        topBar = { PageTitle("Settings", onBack) },
+        snackbarHost = { SnackbarHost(snackbar) }
+    ) { inset ->
         val current = prefs
         if (current == null) {
             Column(Modifier.padding(inset).padding(20.dp)) {
-                PageTitle("Settings", onBack)
                 Text("Loading preferences…")
             }
         } else {
@@ -106,7 +108,7 @@ fun SettingsScreen(viewModel: DashboardViewModel, onBack: () -> Unit) {
                 modifier = Modifier.padding(inset),
                 showHints = current.showHints, reminders = current.reminders,
                 showDeviceLink = showDeviceLink, settingsUnavailable = settingsUnavailable,
-                onBack = onBack, onHints = viewModel::setHints,
+                onHints = viewModel::setHints,
                 onReminders = { wanted ->
                     if (!wanted) {
                         optInPending = false
@@ -176,7 +178,7 @@ private fun Preference(name: String, checked: Boolean, changed: (Boolean) -> Uni
 internal fun SettingsContent(
     modifier: Modifier = Modifier, showHints: Boolean, reminders: Boolean,
     showDeviceLink: Boolean = false, settingsUnavailable: Boolean = false,
-    onBack: () -> Unit, onHints: (Boolean) -> Unit, onReminders: (Boolean) -> Unit,
+    onHints: (Boolean) -> Unit, onReminders: (Boolean) -> Unit,
     onDeviceSettings: () -> Unit, onClear: () -> Unit
 ) {
     var confirmClear by rememberSaveable { mutableStateOf(false) }
@@ -184,7 +186,6 @@ internal fun SettingsContent(
         modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        PageTitle("Settings", onBack)
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             SettingsHeading("Coding practice")
             Preference("Show hints", showHints, onHints)

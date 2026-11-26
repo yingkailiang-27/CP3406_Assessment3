@@ -256,99 +256,101 @@ internal fun StatsContent(
     }
     var selectedMode by rememberSaveable { mutableStateOf<SubmissionMode?>(null) }
     var onlyMisses by rememberSaveable { mutableStateOf(false) }
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(20.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        item { PageTitle("Statistics", onBack) }
-        if (stats != null) item {
-            val total = curriculum.size
-            val solved = curriculum.keys.count { it in stats.solvedTopics }
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-            ) {
-                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Learning progress", style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.semantics { heading() })
-                    Text("$solved of $total problems solved", style = MaterialTheme.typography.headlineSmall)
-                    LinearProgressIndicator(
-                        progress = { solved.toFloat() / total.coerceAtLeast(1) },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-            }
-        }
-        if (stats == null) {
-            item { Text("Loading submissions…") }
-        } else if (stats.submissions.isEmpty()) {
-            item {
-                Text("No submissions yet", style = MaterialTheme.typography.titleLarge)
-                Text("Submit a solution in Coding to record your first result.")
-            }
-        } else {
-            val modeStats = DashboardStats(stats.submissions.filter { selectedMode == null || it.mode == selectedMode })
-            val count = modeStats.submissions.size
-            if (count > 0) item {
-                Card(Modifier.fillMaxWidth()) {
-                    Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        val percent = (modeStats.accepted * 100.0 / count).roundToInt()
-                        Text("$percent% accepted", style = MaterialTheme.typography.headlineMedium)
-                        Text("${modeStats.accepted} of $count submissions passed every test.")
-                        val needsWork = count - modeStats.accepted
-                        Text(
-                            if (needsWork == 1) "1 submission needs work" else "$needsWork submissions need work",
-                            style = MaterialTheme.typography.bodySmall
+    Column(Modifier.fillMaxSize()) {
+        PageTitle("Statistics", onBack)
+        LazyColumn(
+            modifier = Modifier.weight(1f).fillMaxWidth(), contentPadding = PaddingValues(20.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            if (stats != null) item {
+                val total = curriculum.size
+                val solved = curriculum.keys.count { it in stats.solvedTopics }
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                ) {
+                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text("Learning progress", style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.semantics { heading() })
+                        Text("$solved of $total problems solved", style = MaterialTheme.typography.headlineSmall)
+                        LinearProgressIndicator(
+                            progress = { solved.toFloat() / total.coerceAtLeast(1) },
+                            modifier = Modifier.fillMaxWidth()
                         )
                     }
                 }
             }
-            item {
-                Text("Submission history", style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.semantics { heading() })
-                val modes = listOf(null, SubmissionMode.PRACTICE, SubmissionMode.EXAM) +
-                    listOf(SubmissionMode.LEGACY).filter { mode -> stats.submissions.any { it.mode == mode } }
-                Row(
-                    Modifier.horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    modes.forEach { mode ->
-                        FilterChip(selected = selectedMode == mode, onClick = { selectedMode = mode },
-                            modifier = Modifier.testTag("mode-${mode?.name ?: "all"}"),
-                            label = { Text(mode?.label ?: "All modes") })
-                    }
+            if (stats == null) {
+                item { Text("Loading submissions…") }
+            } else if (stats.submissions.isEmpty()) {
+                item {
+                    Text("No submissions yet", style = MaterialTheme.typography.titleLarge)
+                    Text("Submit a solution in Coding to record your first result.")
                 }
-                FilterChip(selected = onlyMisses, onClick = { onlyMisses = !onlyMisses },
-                    label = { Text("Needs work only") })
-            }
-            val visible = if (onlyMisses) modeStats.submissions.filterNot { it.accepted } else modeStats.submissions
-            if (visible.isEmpty()) item { Text(if (modeStats.submissions.isEmpty()) "No submissions for this mode." else "Every submission passed.") }
-            items(visible) { attempt ->
-                val lessonTitle = curriculum[attempt.lessonId]
-                OutlinedCard(Modifier.fillMaxWidth()) {
-                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                        Text(lessonTitle ?: attempt.lessonId, style = MaterialTheme.typography.titleMedium)
-                        Text(attempt.mode.label, style = MaterialTheme.typography.labelMedium)
-                        val colors = MaterialTheme.colorScheme
-                        Surface(
-                            shape = MaterialTheme.shapes.small,
-                            color = if (attempt.accepted) colors.primaryContainer else colors.errorContainer,
-                            contentColor = if (attempt.accepted) colors.onPrimaryContainer else colors.onErrorContainer
-                        ) {
+            } else {
+                val modeStats = DashboardStats(stats.submissions.filter { selectedMode == null || it.mode == selectedMode })
+                val count = modeStats.submissions.size
+                if (count > 0) item {
+                    Card(Modifier.fillMaxWidth()) {
+                        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            val percent = (modeStats.accepted * 100.0 / count).roundToInt()
+                            Text("$percent% accepted", style = MaterialTheme.typography.headlineMedium)
+                            Text("${modeStats.accepted} of $count submissions passed every test.")
+                            val needsWork = count - modeStats.accepted
                             Text(
-                                if (attempt.accepted) "Accepted" else "Needs work",
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                style = MaterialTheme.typography.labelLarge
+                                if (needsWork == 1) "1 submission needs work" else "$needsWork submissions need work",
+                                style = MaterialTheme.typography.bodySmall
                             )
                         }
-                        Text("${attempt.passed}/${attempt.total} tests passed · ${dateFormat.format(Date(attempt.submittedAt))}",
-                            style = MaterialTheme.typography.bodySmall)
-                        if (lessonTitle != null) {
-                            val action = if (attempt.mode == SubmissionMode.EXAM) "Open exam" else "Open practice"
-                            OutlinedButton(
-                                onClick = { onRetry(attempt.lessonId, attempt.mode) },
-                                modifier = Modifier.fillMaxWidth()
-                            ) { Text(action) }
+                    }
+                }
+                item {
+                    Text("Submission history", style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.semantics { heading() })
+                    val modes = listOf(null, SubmissionMode.PRACTICE, SubmissionMode.EXAM) +
+                        listOf(SubmissionMode.LEGACY).filter { mode -> stats.submissions.any { it.mode == mode } }
+                    Row(
+                        Modifier.horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        modes.forEach { mode ->
+                            FilterChip(selected = selectedMode == mode, onClick = { selectedMode = mode },
+                                modifier = Modifier.testTag("mode-${mode?.name ?: "all"}"),
+                                label = { Text(mode?.label ?: "All modes") })
+                        }
+                    }
+                    FilterChip(selected = onlyMisses, onClick = { onlyMisses = !onlyMisses },
+                        label = { Text("Needs work only") })
+                }
+                val visible = if (onlyMisses) modeStats.submissions.filterNot { it.accepted } else modeStats.submissions
+                if (visible.isEmpty()) item { Text(if (modeStats.submissions.isEmpty()) "No submissions for this mode." else "Every submission passed.") }
+                items(visible) { attempt ->
+                    val lessonTitle = curriculum[attempt.lessonId]
+                    OutlinedCard(Modifier.fillMaxWidth()) {
+                        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                            Text(lessonTitle ?: attempt.lessonId, style = MaterialTheme.typography.titleMedium)
+                            Text(attempt.mode.label, style = MaterialTheme.typography.labelMedium)
+                            val colors = MaterialTheme.colorScheme
+                            Surface(
+                                shape = MaterialTheme.shapes.small,
+                                color = if (attempt.accepted) colors.primaryContainer else colors.errorContainer,
+                                contentColor = if (attempt.accepted) colors.onPrimaryContainer else colors.onErrorContainer
+                            ) {
+                                Text(
+                                    if (attempt.accepted) "Accepted" else "Needs work",
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                    style = MaterialTheme.typography.labelLarge
+                                )
+                            }
+                            Text("${attempt.passed}/${attempt.total} tests passed · ${dateFormat.format(Date(attempt.submittedAt))}",
+                                style = MaterialTheme.typography.bodySmall)
+                            if (lessonTitle != null) {
+                                val action = if (attempt.mode == SubmissionMode.EXAM) "Open exam" else "Open practice"
+                                OutlinedButton(
+                                    onClick = { onRetry(attempt.lessonId, attempt.mode) },
+                                    modifier = Modifier.fillMaxWidth()
+                                ) { Text(action) }
+                            }
                         }
                     }
                 }
@@ -359,9 +361,20 @@ internal fun StatsContent(
 
 @Composable
 internal fun PageTitle(label: String, onBack: () -> Unit) {
-    Column {
-        TextButton(onClick = onBack) { Text("Back") }
-        Text(label, modifier = Modifier.semantics { heading() },
-            style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
+    Surface(color = Color(0xFF173C2B), contentColor = Color.White) {
+        Row(
+            Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onBack) {
+                Icon(painterResource(R.drawable.ic_back), contentDescription = "Back to home")
+            }
+            Text(
+                label,
+                modifier = Modifier.weight(1f).semantics { heading() },
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold
+            )
+        }
     }
 }

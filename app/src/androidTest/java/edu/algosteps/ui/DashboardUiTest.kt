@@ -36,7 +36,7 @@ class DashboardUiTest {
         var deletions = 0
         compose.setContent {
             MaterialTheme {
-                SettingsContent(showHints = true, reminders = false, onBack = {}, onHints = {},
+                SettingsContent(showHints = true, reminders = false, onHints = {},
                     onReminders = {}, onDeviceSettings = {}, onClear = { deletions++ })
             }
         }
