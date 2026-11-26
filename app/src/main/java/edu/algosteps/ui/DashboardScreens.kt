@@ -1,6 +1,7 @@
 package edu.algosteps.ui
 
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -74,23 +75,33 @@ internal fun HomeContent(
             onSearch(search.trim())
         }
     }
+    val dark = isSystemInDarkTheme()
+    val paper = if (dark) MaterialTheme.colorScheme.background else Color(0xFFFAF6EC)
+    val forest = Color(0xFF173C2B)
+    val cardColor = if (dark) MaterialTheme.colorScheme.surfaceVariant else Color(0xFFE5ECD9)
     LazyColumn(
-        modifier = Modifier.fillMaxSize().imePadding(),
-        contentPadding = PaddingValues(20.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        modifier = Modifier.fillMaxSize().background(paper).imePadding(),
+        contentPadding = PaddingValues(bottom = 32.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         item {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("AlgoSteps", Modifier.weight(1f).semantics { heading() },
-                    style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
-                IconButton(onClick = onSettings) {
-                    Icon(painterResource(R.drawable.ic_settings), contentDescription = "Settings")
+            Surface(color = forest, contentColor = Color.White) {
+                Row(
+                    Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("AlgoSteps", Modifier.weight(1f).semantics { heading() },
+                        style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                    IconButton(onClick = onSettings) {
+                        Icon(painterResource(R.drawable.ic_settings), contentDescription = "Settings")
+                    }
                 }
             }
         }
         item {
             Text(
-                text = "Trace an algorithm, predict the next step, then practise writing code.",
+                text = "Learn algorithms",
+                modifier = Modifier.padding(horizontal = 20.dp).semantics { heading() },
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold
             )
@@ -99,7 +110,8 @@ internal fun HomeContent(
             OutlinedTextField(
                 value = search,
                 onValueChange = { search = it },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+                shape = RoundedCornerShape(12.dp),
                 label = { Text("Search lessons") },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
@@ -110,22 +122,25 @@ internal fun HomeContent(
             )
         }
         item {
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Column(Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text("Course library", style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.semantics { heading() })
-                TrackCard(false, onAlgorithms, Modifier.fillMaxWidth())
+                TrackCard(false, onAlgorithms, cardColor, forest)
                 if (onImport != null) {
                     TextButton(onClick = onImport) { Text("Import a lesson file") }
                 }
             }
         }
-        item { TrackCard(true, onCoding, Modifier.fillMaxWidth()) }
         item {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-            ) {
-                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                TrackCard(true, onCoding, cardColor, forest)
+            }
+        }
+        item {
+            Column(Modifier.padding(horizontal = 20.dp)) {
+                HorizontalDivider()
+
+                Column(Modifier.padding(top = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text("Your progress", style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.semantics { heading() })
                     if (stats == null) {
@@ -145,35 +160,42 @@ internal fun HomeContent(
 }
 
 @Composable
-private fun TrackCard(coding: Boolean, onClick: () -> Unit, modifier: Modifier) {
-    val colors = MaterialTheme.colorScheme
+private fun TrackCard(coding: Boolean, onClick: () -> Unit, cardColor: Color, forest: Color) {
     Surface(
         onClick = onClick,
-        modifier = modifier,
-        shape = RoundedCornerShape(20.dp),
-        color = if (coding) colors.surface else colors.primary,
-        contentColor = if (coding) colors.onSurface else colors.onPrimary,
-        border = if (coding) BorderStroke(1.dp, colors.outline) else null
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp),
+        color = cardColor,
+        contentColor = MaterialTheme.colorScheme.onSurface
     ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier.padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            TrackMark(coding, LocalContentColor.current)
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Text(
-                    if (coding) "Coding practice" else "Browse algorithms",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    if (coding) "Write code and run sample tests." else "Follow worked examples step by step.",
-                    style = MaterialTheme.typography.bodyMedium
-                )
+            if (coding) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    TrackMark(true, LocalContentColor.current)
+                    Text("Coding practice", style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold)
+                }
+                Text("Write code and run sample tests.", style = MaterialTheme.typography.bodyMedium)
+            } else {
+                Text("Follow worked examples step by step.", style = MaterialTheme.typography.bodyMedium)
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = forest,
+                    contentColor = Color.White,
+                    shape = RoundedCornerShape(10.dp)
+                ) {
+                    Box(Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                        contentAlignment = Alignment.Center) {
+                        Text("Browse algorithms", style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold)
+                    }
+                }
             }
         }
     }

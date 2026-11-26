@@ -2,7 +2,11 @@ package edu.algosteps.ui
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
@@ -16,6 +20,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import edu.algosteps.R
@@ -61,31 +68,47 @@ fun CollectionScreen(
     val importedMatches = imported.filter {
         it.title.contains(searchTerm, ignoreCase = true) || it.summary.contains(searchTerm, ignoreCase = true)
     }
-    Box(Modifier.fillMaxSize().imePadding(), contentAlignment = Alignment.TopCenter) {
-        LazyColumn(
-            modifier = Modifier.widthIn(max = 720.dp).fillMaxWidth(),
-            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            item {
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        IconButton(onClick = onBack) {
-                            Icon(painterResource(R.drawable.ic_back), contentDescription = "Back to home")
-                        }
-                        Text(
-                            if (coding) "Coding" else "Algorithms",
-                            style = MaterialTheme.typography.headlineLarge,
-                            modifier = Modifier.weight(1f).semantics { heading() }
-                        )
+    val paper = if (!coding && !isSystemInDarkTheme()) Color(0xFFFAF6EC)
+        else MaterialTheme.colorScheme.background
+    Column(Modifier.fillMaxSize().background(paper).imePadding(),
+        horizontalAlignment = Alignment.CenterHorizontally) {
+        if (!coding) {
+            Surface(color = Color(0xFF173C2B), contentColor = Color.White) {
+                Row(
+                    Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = onBack) {
+                        Icon(painterResource(R.drawable.ic_back), contentDescription = "Back to home")
                     }
-                    if (coding) {
+                    Text("Algorithms", Modifier.weight(1f).semantics { heading() },
+                        style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                }
+            }
+        }
+        LazyColumn(
+            modifier = Modifier.weight(1f).widthIn(max = 720.dp).fillMaxWidth(),
+            contentPadding = PaddingValues(horizontal = 20.dp, vertical = if (coding) 12.dp else 20.dp),
+            verticalArrangement = Arrangement.spacedBy(if (coding) 12.dp else 16.dp)
+        ) {
+            if (coding) {
+                item {
+                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            IconButton(onClick = onBack) {
+                                Icon(painterResource(R.drawable.ic_back), contentDescription = "Back to home")
+                            }
+                            Text("Coding", Modifier.weight(1f).semantics { heading() },
+                                style = MaterialTheme.typography.headlineLarge)
+                        }
                         Text("Practice with a walkthrough, or take a single-problem exam independently.",
                             style = MaterialTheme.typography.bodyLarge)
-                    } else if (searchTerm.isNotEmpty()) {
-                        Text("Results for “$searchTerm”", style = MaterialTheme.typography.titleMedium)
-                        TextButton(onClick = { query = "" }) { Text("Clear search") }
                     }
+                }
+            } else if (searchTerm.isNotEmpty()) {
+                item {
+                    Text("Results for “$searchTerm”", style = MaterialTheme.typography.titleMedium)
+                    TextButton(onClick = { query = "" }) { Text("Clear search") }
                 }
             }
             if (libraryError) item { Text("Could not read the saved course library.") }
@@ -119,11 +142,36 @@ fun CollectionScreen(
 
 @Composable
 private fun AlgorithmRow(title: String, summary: String, label: String, onClick: () -> Unit) {
-    OutlinedCard(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-            Text(title, style = MaterialTheme.typography.titleMedium)
-            Text(summary, style = MaterialTheme.typography.bodyMedium)
-            Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
+    val dark = isSystemInDarkTheme()
+    val colors = MaterialTheme.colorScheme
+    OutlinedCard(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.outlinedCardColors(
+            containerColor = if (dark) colors.surfaceVariant else Color(0xFFE5ECD9)
+        ),
+        border = BorderStroke(1.dp, if (dark) colors.outline else Color(0xFFA9BDA1))
+    ) {
+        Row(
+            Modifier.padding(20.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Surface(
+                    shape = RoundedCornerShape(50),
+                    color = if (dark) colors.secondaryContainer else Color(0xFFCBDDB9),
+                    contentColor = if (dark) colors.onSecondaryContainer else Color(0xFF173C2B)
+                ) {
+                    Text(label, Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.labelMedium)
+                }
+                Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                Text(summary, style = MaterialTheme.typography.bodyMedium)
+            }
+            Icon(painterResource(R.drawable.ic_back), contentDescription = null,
+                modifier = Modifier.size(18.dp).rotate(180f))
         }
     }
 }
